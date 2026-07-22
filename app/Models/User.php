@@ -86,4 +86,10 @@ class User extends Authenticatable
         if ($this->hasRole('editor')) return 'editor';
         return 'cliente';
     }
+
+    /** Ruta a la que se redirige tras login/registro/verificación, según el rol. */
+    public function homeRouteName(): string
+    {
+        return $this->canAccessAdmin() ? 'admin.dashboard' : 'account.index';
+    }
 }
