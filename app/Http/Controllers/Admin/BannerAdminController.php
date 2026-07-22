@@ -26,11 +26,10 @@ class BannerAdminController extends Controller
             'subtitle'    => 'nullable|string|max:255',
             'cta_label' => 'nullable|string|max:100',
             'cta_url'  => 'nullable|string|max:255',
-            'image'       => 'required|image|max:10240',
+            'image'       => 'required|string|max:2048',
             'order'       => 'nullable|integer|min:0',
             'is_active'   => 'nullable|boolean',
         ]);
-        $data['image']     = $request->file('image')->store('banners', 'public');
         $data['is_active'] = $request->boolean('is_active');
         $data['order']     = $request->input('order', 0);
         Banner::create($data);
@@ -49,13 +48,10 @@ class BannerAdminController extends Controller
             'subtitle'    => 'nullable|string|max:255',
             'cta_label' => 'nullable|string|max:100',
             'cta_url'  => 'nullable|string|max:255',
-            'image'       => 'nullable|image|max:10240',
+            'image'       => 'nullable|string|max:2048',
             'order'       => 'nullable|integer|min:0',
             'is_active'   => 'nullable|boolean',
         ]);
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('banners', 'public');
-        }
         $data['is_active'] = $request->boolean('is_active');
         $banner->update($data);
         return redirect()->route('admin.banners.index')->with('success', 'Banner actualizado.');

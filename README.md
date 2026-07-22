@@ -198,40 +198,46 @@ php artisan up
 ```
 app/
   Http/Controllers/        # Controladores públicos (shop, artisans, posts, checkout...)
-  Http/Controllers/Admin/  # CRUD completo del panel admin
-  Models/                  # Product, Category, Order, Artisan, Post, Banner, etc.
+  Http/Controllers/Admin/  # CRUD completo del panel admin (incluye MediaAdminController)
+  Models/                  # Product, Category, Order, Artisan, Post, Banner, MediaFile, etc.
   Http/Middleware/          # RoleMiddleware, AdminAccessMiddleware
+  Services/                # BancardService, PagoparService (integración real de pasarelas de pago)
+  helpers.php              # media_url() — resuelve URLs de biblioteca multimedia y paths legado
 database/
   migrations/              # Todas las tablas del sistema
   seeders/                 # Datos iniciales (productos, usuarios, configuración)
 resources/
   views/
     layouts/               # app.blade.php, admin.blade.php, guest.blade.php
+    components/admin/      # media-picker.blade.php, media-picker-multi.blade.php
     home.blade.php
     shop/                  # index.blade.php, product.blade.php
-    cart/checkout/         # Flujo de compra
+    checkout/              # Flujo de compra (index, confirmation)
     artisans/              # index.blade.php, show.blade.php
     posts/                 # Noticias/blog
     pages/                 # about.blade.php, contact.blade.php, legal.blade.php
     account/               # Pedidos, wishlist, perfil, direcciones
-    admin/                 # Dashboard y CRUD completo
+    admin/                 # Dashboard y CRUD completo (incluye admin/media/index.blade.php)
 public/
-  assets/brand/            # logo-horizontal.png, logo-vertical.png, logo-mark.png
-  assets/institucional/    # Fotos de la sección "Manos que transforman"
+  assets/brand/            # logo-horizontal.png, logo-vertical.png, logo-mark.png (fallback si no hay logo cargado en admin)
+  assets/institucional/    # Fotos por defecto de la sección institucional de la home
   storage -> storage/app/public/  # Imágenes subidas (symlink)
 storage/app/public/
-  products/                # Fotos de productos
-  categories/              # Imágenes de categorías
-  artisans/                # Fotos de artesanas
-  posts/                   # Imágenes de noticias
-  banners/                 # Banners del hero
+  products/                # Fotos de productos (legado, previo a la biblioteca multimedia)
+  categories/              # Imágenes de categorías (legado)
+  artisans/                # Fotos de artesanas (legado)
+  posts/                   # Imágenes de noticias (legado)
+  banners/                 # Banners del hero (legado)
+  media/                   # Biblioteca multimedia — todo archivo nuevo subido vía /admin/multimedia
+tests/
+  Feature/CheckoutPaymentGatewaysTest.php  # Tests del checkout con las 3 pasarelas de pago
 ```
 
 ---
 
 ## Panel administrativo
 
-Accedé en `/admin` con usuario rol `admin`, `editor` o `vendedor`.
+Accedé en `/admin` con usuario rol `admin`, `editor` o `vendedor`. Al iniciar sesión, cada rol es redirigido automáticamente: admin/editor/vendedor a `/admin`, clientes a `/mi-cuenta`.
 
 | Sección | Ruta |
 |---------|------|
@@ -242,13 +248,60 @@ Accedé en `/admin` con usuario rol `admin`, `editor` o `vendedor`.
 | Artesanas | /admin/artisans |
 | Noticias | /admin/posts |
 | Banners hero | /admin/banners |
+| Multimedia | /admin/multimedia |
+| Página de inicio / Nosotros (contenido editable) | /admin/contenido |
 | Mensajes | /admin/contacts |
 | Newsletter | /admin/newsletter |
 | Usuarios | /admin/users |
 | Páginas legales | /admin/legal |
-| Configuración general | /admin/configuracion |
-| Integraciones (pagos/captcha) | /admin/integraciones |
-| Métodos de envío | /admin/envios |
+| Configuración general (nombre, logo, favicon, contacto, redes) | /admin/configuracion |
+| Integraciones (pagos/captcha/analytics) | /admin/integraciones |
+| Envíos (zonas por departamento/ciudad, retiro en tienda, AEX) | /admin/envios |
+
+### Biblioteca multimedia
+
+Todo campo de imagen del admin (productos, banners, categorías, artesanas, posts, logo del sitio, favicon, contenido de la home) se carga con un mismo selector con 3 opciones:
+
+- **Biblioteca**: elegir un archivo ya subido antes
+- **Subir**: subir un archivo nuevo desde la computadora (queda archivado en la biblioteca)
+- **URL**: pegar el link de una imagen externa
+
+Desde `/admin/multimedia` se puede ver, buscar, copiar la URL y eliminar cualquier archivo subido.
+
+### Categorías y subcategorías
+
+Las subcategorías se gestionan dentro de la pantalla de edición de cada categoría (`/admin/categories/{id}/edit`): alta, edición de nombre/orden/estado y eliminación, sin necesidad de una pantalla aparte. Se usan como filtro adicional en la tienda (`/tienda?categoria=...&subcategoria=...`) y al asignar un producto.
+
+### Métodos de pago
+
+Configurables desde `/admin/integraciones`:
+
+- **Transferencia bancaria** — manual. El cliente sube un comprobante (PDF, JPG o PNG, máx. 5MB) al finalizar la compra; el pedido queda en estado "pendiente de verificación" hasta que un admin lo revisa y aprueba desde `/admin/orders/{id}` (el comprobante aparece como link "Ver comprobante de transferencia").
+- **Pagopar** — integración real con la API de Pagopar (tarjetas, Tigo Money, billeteras). Requiere cargar `public_key` y `private_key` reales.
+- **Bancard** — integración real con la API VPOS de Bancard (tarjetas de crédito/débito). Requiere cargar `public_key` y `private_key` reales.
+
+Al activar Pagopar o Bancard, la pantalla de integraciones muestra las URLs de webhook que hay que configurar en el panel de cada pasarela.
+
+### Envíos
+
+Configurables desde `/admin/envios`:
+
+- **Retiro en tienda** — gratis, on/off.
+- **Envío propio** — tarifa por departamento de Paraguay (18 departamentos con sus ciudades/distritos), con tarifa base por departamento y tarifas personalizadas por ciudad/distrito. Permite deshabilitar ciudades puntuales dentro de un departamento activo.
+- **Envío gratis** — activable a partir de un monto mínimo configurable.
+- **AEX** — credenciales de API (usuario/contraseña, sandbox o producción) para la integración con el courier AEX.
+
+En el checkout, el cliente elige departamento y ciudad; el costo se cotiza en tiempo real vía `/checkout/shipping` contra las tarifas configuradas (no se calcula ni se confía en el cliente).
+
+---
+
+## Testing
+
+```bash
+php artisan test
+```
+
+`tests/Feature/CheckoutPaymentGatewaysTest.php` cubre los 3 métodos de pago del checkout (transferencia, Bancard, Pagopar) simulando las respuestas de las pasarelas externas con `Http::fake()`.
 
 ---
 

@@ -3,17 +3,18 @@
 @section('content')
 <section class="py-16 md:py-24">
     <div class="container mx-auto px-4">
+        @php($content = \App\Models\SiteSetting::group('content'))
         <div class="text-center mb-12">
-            <p class="section-subtitle mb-2">Mujeres Unidas del Bañado Sur</p>
-            <h1 class="section-title">Nuestras Artesanas</h1>
-            <p class="text-stone-500 mt-4 max-w-2xl mx-auto">Cada pieza lleva las manos y el corazón de mujeres emprendedoras que transforman materiales reciclados en arte.</p>
+            <p class="section-subtitle mb-2">{{ $content['artisans_eyebrow'] ?? 'Mujeres Unidas del Bañado Sur' }}</p>
+            <h1 class="section-title">{{ $content['artisans_title'] ?? 'Nuestras Artesanas' }}</h1>
+            <p class="text-stone-500 mt-4 max-w-2xl mx-auto">{{ $content['artisans_subtitle'] ?? 'Cada pieza lleva las manos y el corazón de mujeres emprendedoras que transforman materiales reciclados en arte.' }}</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             @forelse($artisans as $artisan)
             <a href="{{ route('artisans.show', $artisan->slug) }}" class="group text-center">
                 <div class="w-36 h-36 rounded-full overflow-hidden mx-auto mb-4 border-2 border-transparent group-hover:border-copper-300 transition-all duration-300">
                     @if($artisan->photo)
-                    <img src="{{ asset('storage/' . $artisan->photo) }}" alt="{{ $artisan->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ $artisan->photo_url }}" alt="{{ $artisan->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     @else
                     <div class="w-full h-full bg-copper-100 flex items-center justify-center text-copper-500 text-5xl font-display">{{ substr($artisan->name, 0, 1) }}</div>
                     @endif

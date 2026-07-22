@@ -32,18 +32,32 @@
         </div>
         <div class="bg-white border border-stone-100 shadow-sm p-5">
             <h3 class="text-xs uppercase tracking-widest text-stone-400 mb-3">Dirección de envío</h3>
-            <p class="text-sm text-stone-600">{{ $order->shipping_address }}</p>
-            <p class="text-sm text-stone-600">{{ $order->shipping_city }}, {{ $order->shipping_department }}</p>
-            @if($order->shipping_notes)
-            <p class="text-xs text-stone-400 mt-1 italic">{{ $order->shipping_notes }}</p>
+            @if($order->shipping_method === 'retiro_tienda')
+            <p class="text-sm text-stone-600">Retiro en tienda</p>
+            @else
+            <p class="text-sm text-stone-600">{{ $order->address_line1 }}</p>
+            <p class="text-sm text-stone-600">{{ $order->address_city }}, {{ $order->address_department }}</p>
+            @if($order->address_notes)
+            <p class="text-xs text-stone-400 mt-1 italic">{{ $order->address_notes }}</p>
+            @endif
             @endif
         </div>
         <div class="bg-white border border-stone-100 shadow-sm p-5">
             <h3 class="text-xs uppercase tracking-widest text-stone-400 mb-3">Pago</h3>
             <p class="text-sm text-stone-600 capitalize">{{ $order->payment_method }}</p>
             <p class="text-xs text-stone-400">Estado: <span class="{{ $order->payment_status === 'pagado' ? 'text-green-600' : 'text-orange-500' }}">{{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}</span></p>
-            @if($order->payment_reference)
-            <p class="text-xs text-stone-400 mt-1">Ref: {{ $order->payment_reference }}</p>
+            @if($order->payment_method === 'transferencia')
+            <div class="mt-3 pt-3 border-t border-stone-100">
+                @if($order->transfer_receipt)
+                <a href="{{ Storage::url($order->transfer_receipt) }}" target="_blank"
+                   class="inline-flex items-center gap-1.5 text-xs font-medium text-copper-600 hover:text-copper-700 hover:underline">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Ver comprobante de transferencia
+                </a>
+                @else
+                <p class="text-xs text-red-500">El cliente aún no subió el comprobante.</p>
+                @endif
+            </div>
             @endif
         </div>
     </div>
@@ -66,8 +80,8 @@
                 <tr>
                     <td class="px-5 py-3">
                         <p class="font-medium text-stone-700">{{ $item->product_name }}</p>
-                        @if($item->product_color)
-                        <p class="text-xs text-stone-400">Color: {{ $item->product_color }}</p>
+                        @if($item->color)
+                        <p class="text-xs text-stone-400">Color: {{ $item->color }}</p>
                         @endif
                     </td>
                     <td class="px-5 py-3 text-center">{{ $item->quantity }}</td>
@@ -95,10 +109,10 @@
         </table>
     </div>
 
-    @if($order->notes)
+    @if($order->address_notes)
     <div class="bg-white border border-stone-100 shadow-sm p-5">
         <h3 class="text-xs uppercase tracking-widest text-stone-400 mb-2">Notas del cliente</h3>
-        <p class="text-sm text-stone-600">{{ $order->notes }}</p>
+        <p class="text-sm text-stone-600">{{ $order->address_notes }}</p>
     </div>
     @endif
 

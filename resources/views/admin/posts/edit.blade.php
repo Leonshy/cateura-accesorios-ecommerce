@@ -23,9 +23,6 @@
         </div>
         <div class="space-y-5">
             <div class="bg-white border border-stone-100 shadow-sm p-5 space-y-4">
-                @if($post->image)
-                <div><img src="{{ asset('storage/' . $post->image) }}" alt="" class="w-full h-32 object-cover mb-2"></div>
-                @endif
                 <div>
                     <label class="block text-xs font-medium text-stone-600 mb-1">Tipo</label>
                     <select name="type" class="input-cateura border p-2 w-full">
@@ -33,10 +30,7 @@
                         <option value="evento" {{ old('type', $post->type) === 'evento' ? 'selected' : '' }}>Evento</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-stone-600 mb-1">Reemplazar imagen</label>
-                    <input type="file" name="image" accept="image/*" class="text-sm text-stone-600 file:mr-3 file:px-4 file:py-2 file:border-0 file:bg-copper-50 file:text-copper-600 file:text-xs file:cursor-pointer">
-                </div>
+                <x-admin.media-picker name="image" value="{{ old('image', $post->image) }}" label="Imagen" />
                 <div>
                     <label class="block text-xs font-medium text-stone-600 mb-1">Fecha de publicación</label>
                     <input type="date" name="published_at" value="{{ old('published_at', $post->published_at?->format('Y-m-d')) }}" class="input-cateura border p-2 w-full">

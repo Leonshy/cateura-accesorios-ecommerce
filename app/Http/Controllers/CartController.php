@@ -62,7 +62,9 @@ class CartController extends Controller
             ]);
         }
 
-        return back()->with('success', '¡Producto agregado al carrito!');
+        return back()->with('success', '¡Producto agregado al carrito!')
+            ->with('success_link', route('cart.index'))
+            ->with('success_link_label', 'Ver carrito');
     }
 
     public function update(Request $request, CartItem $item)

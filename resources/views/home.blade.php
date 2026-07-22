@@ -18,7 +18,7 @@
              x-transition:enter-end="opacity-100"
              class="absolute inset-0"
              style="display:{{ $i === 0 ? 'block' : 'none' }}">
-            <img src="{{ asset('storage/' . $banner->image) }}" alt="{{ $banner->title }}"
+            <img src="{{ $banner->image_url }}" alt="{{ $banner->title }}"
                  class="w-full h-full object-cover" style="min-height:480px;">
             <div class="absolute inset-0 flex items-center" style="background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.50) 60%, rgba(0,0,0,0.30) 100%)">
                 <div class="max-w-7xl mx-auto px-8 py-20">
@@ -30,9 +30,6 @@
                     @if($banner->cta_url)
                     <div class="flex flex-wrap gap-4">
                         <a href="{{ $banner->cta_url }}" class="btn-copper">{{ $banner->cta_label ?? 'Comprar ahora' }}</a>
-                        <a href="{{ route('artisans.index') }}" class="inline-flex items-center gap-2 text-white border border-white/60 px-6 py-3 text-xs uppercase tracking-widest hover:bg-white/10 transition-colors">
-                            Conocer a las artesanas
-                        </a>
                     </div>
                     @endif
                 </div>
@@ -81,7 +78,7 @@
             <a href="{{ route('shop.index', ['categoria' => $category->slug]) }}"
                class="group relative overflow-hidden bg-stone-100 aspect-[4/3] flex items-end">
                 @if($category->image)
-                <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
+                <img src="{{ $category->image_url }}" alt="{{ $category->name }}"
                      class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                 @else
                 <div class="absolute inset-0 bg-gradient-to-br from-stone-700 to-stone-900 group-hover:from-copper-700 group-hover:to-stone-900 transition-all duration-500"></div>
@@ -144,26 +141,35 @@
 <section class="py-24 bg-stone-900 text-white">
     <div class="max-w-7xl mx-auto px-4">
         <div class="grid md:grid-cols-2 gap-16 items-center">
+            @php
+                $historia = \App\Models\SiteSetting::group('content');
+                $historiaImgs = [
+                    !empty($historia['historia_img1']) ? media_url($historia['historia_img1']) : asset('assets/institucional/artesana-boceto.jpg'),
+                    !empty($historia['historia_img2']) ? media_url($historia['historia_img2']) : asset('assets/institucional/taller-mujeres.jpg'),
+                    !empty($historia['historia_img3']) ? media_url($historia['historia_img3']) : asset('assets/institucional/taller-ceramica.jpg'),
+                    !empty($historia['historia_img4']) ? media_url($historia['historia_img4']) : asset('assets/institucional/artesanas-tejiendo.jpg'),
+                ];
+            @endphp
             <div>
-                <p class="section-subtitle text-copper-400 mb-4">Nuestra historia</p>
+                <p class="section-subtitle text-copper-400 mb-4">{{ $historia['historia_eyebrow'] ?? 'Nuestra historia' }}</p>
                 <h2 class="font-display text-4xl md:text-5xl font-medium leading-tight mb-6">
-                    Manos que transforman<br><span class="text-copper-400">el mundo</span>
+                    {{ $historia['historia_title_line1'] ?? 'Manos que transforman' }}<br><span class="text-copper-400">{{ $historia['historia_title_line2'] ?? 'el mundo' }}</span>
                 </h2>
                 <p class="text-stone-300 leading-relaxed mb-6">
-                    Cateura Accesorios es la marca de los productos elaborados por artesanas de la Asociación Mujeres Unidas del Bañado Sur. A partir de materiales reciclados, transforman con sus manos objetos descartados en artículos de gran belleza, transmitiendo esperanza, dignidad y compromiso con la comunidad.
+                    {{ $historia['historia_text'] ?? 'Cateura Accesorios es la marca de los productos elaborados por artesanas de la Asociación Mujeres Unidas del Bañado Sur. A partir de materiales reciclados, transforman con sus manos objetos descartados en artículos de gran belleza, transmitiendo esperanza, dignidad y compromiso con la comunidad.' }}
                 </p>
                 <div class="grid grid-cols-3 gap-6 mb-8">
                     <div class="text-center">
-                        <div class="font-display text-3xl text-copper-400 font-medium">+50</div>
-                        <div class="text-xs text-stone-400 uppercase tracking-wider mt-1">Artesanas</div>
+                        <div class="font-display text-3xl text-copper-400 font-medium">{{ $historia['historia_stat1_value'] ?? '+50' }}</div>
+                        <div class="text-xs text-stone-400 uppercase tracking-wider mt-1">{{ $historia['historia_stat1_label'] ?? 'Artesanas' }}</div>
                     </div>
                     <div class="text-center">
-                        <div class="font-display text-3xl text-copper-400 font-medium">100%</div>
-                        <div class="text-xs text-stone-400 uppercase tracking-wider mt-1">Reciclado</div>
+                        <div class="font-display text-3xl text-copper-400 font-medium">{{ $historia['historia_stat2_value'] ?? '100%' }}</div>
+                        <div class="text-xs text-stone-400 uppercase tracking-wider mt-1">{{ $historia['historia_stat2_label'] ?? 'Reciclado' }}</div>
                     </div>
                     <div class="text-center">
-                        <div class="font-display text-3xl text-copper-400 font-medium">PY</div>
-                        <div class="text-xs text-stone-400 uppercase tracking-wider mt-1">Hecho en PY</div>
+                        <div class="font-display text-3xl text-copper-400 font-medium">{{ $historia['historia_stat3_value'] ?? 'PY' }}</div>
+                        <div class="text-xs text-stone-400 uppercase tracking-wider mt-1">{{ $historia['historia_stat3_label'] ?? 'Hecho en PY' }}</div>
                     </div>
                 </div>
                 <div class="flex gap-4">
@@ -173,16 +179,16 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="aspect-square overflow-hidden">
-                    <img src="{{ asset('assets/institucional/artesana-boceto.jpg') }}" alt="Artesana diseñando" class="w-full h-full object-cover">
+                    <img src="{{ $historiaImgs[0] }}" alt="Artesana diseñando" class="w-full h-full object-cover">
                 </div>
                 <div class="aspect-square overflow-hidden col-start-2 row-start-2">
-                    <img src="{{ asset('assets/institucional/taller-mujeres.jpg') }}" alt="Mujeres en taller" class="w-full h-full object-cover">
+                    <img src="{{ $historiaImgs[1] }}" alt="Mujeres en taller" class="w-full h-full object-cover">
                 </div>
                 <div class="aspect-square overflow-hidden col-start-2 row-start-1">
-                    <img src="{{ asset('assets/institucional/taller-ceramica.jpg') }}" alt="Taller de cerámica" class="w-full h-full object-cover">
+                    <img src="{{ $historiaImgs[2] }}" alt="Taller de cerámica" class="w-full h-full object-cover">
                 </div>
                 <div class="aspect-square overflow-hidden">
-                    <img src="{{ asset('assets/institucional/artesanas-tejiendo.jpg') }}" alt="Artesanas tejiendo" class="w-full h-full object-cover">
+                    <img src="{{ $historiaImgs[3] }}" alt="Artesanas tejiendo" class="w-full h-full object-cover">
                 </div>
             </div>
         </div>
@@ -235,7 +241,7 @@
             <article class="group">
                 <a href="{{ route('posts.show', $post->slug) }}" class="block overflow-hidden bg-stone-200 aspect-video mb-4">
                     @if($post->image)
-                    <img src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}"
+                    <img src="{{ $post->image_url }}" alt="{{ $post->title }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     @else
                     <div class="w-full h-full bg-gradient-to-br from-stone-700 to-stone-900 flex items-center justify-center">

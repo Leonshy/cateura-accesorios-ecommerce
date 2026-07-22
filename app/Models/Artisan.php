@@ -20,7 +20,7 @@ class Artisan extends Model
     public function getPhotoUrlAttribute(): string
     {
         return $this->photo
-            ? asset('storage/' . $this->photo)
+            ? media_url($this->photo)
             : asset('assets/images/placeholder-artisan.jpg');
     }
 }

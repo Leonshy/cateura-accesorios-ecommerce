@@ -26,13 +26,10 @@ class PostAdminController extends Controller
             'excerpt'      => 'nullable|string',
             'content'      => 'nullable|string',
             'type'         => 'required|in:noticia,evento',
-            'image'        => 'nullable|image|max:5120',
+            'image'        => 'nullable|string|max:2048',
             'published_at' => 'nullable|date',
             'status'       => 'nullable|in:publicado,borrador',
         ]);
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('posts', 'public');
-        }
         $data['status'] = $request->input('status', 'borrador');
         Post::create($data);
         return redirect()->route('admin.posts.index')->with('success', 'Publicación creada.');
@@ -50,13 +47,10 @@ class PostAdminController extends Controller
             'excerpt'      => 'nullable|string',
             'content'      => 'nullable|string',
             'type'         => 'required|in:noticia,evento',
-            'image'        => 'nullable|image|max:5120',
+            'image'        => 'nullable|string|max:2048',
             'published_at' => 'nullable|date',
             'status'       => 'nullable|in:publicado,borrador',
         ]);
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('posts', 'public');
-        }
         $data['status'] = $request->input('status', 'borrador');
         $post->update($data);
         return redirect()->route('admin.posts.index')->with('success', 'Publicación actualizada.');

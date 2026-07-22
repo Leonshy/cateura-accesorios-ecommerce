@@ -28,6 +28,19 @@
                 <input type="text" name="credentials[{{ $key }}]" value="{{ $value }}" class="input-cateura border p-2 w-full font-mono text-xs">
             </div>
             @endforeach
+            @if($method->key === 'pagopar')
+            <div class="bg-stone-50 border border-stone-100 p-3 text-xs text-stone-500 space-y-1">
+                <p class="font-medium text-stone-600">Configurá estas URLs en tu panel de Pagopar:</p>
+                <p>Webhook: <code class="text-copper-600">{{ url('/checkout/webhooks/pagopar') }}</code></p>
+                <p>Retorno: <code class="text-copper-600">{{ url('/checkout/pagopar/retorno/{hash}') }}</code></p>
+            </div>
+            @endif
+            @if($method->key === 'bancard')
+            <div class="bg-stone-50 border border-stone-100 p-3 text-xs text-stone-500 space-y-1">
+                <p class="font-medium text-stone-600">Configurá esta URL de confirmación en tu panel de Bancard:</p>
+                <p>Webhook: <code class="text-copper-600">{{ url('/checkout/webhooks/bancard') }}</code></p>
+            </div>
+            @endif
             @endif
             <div class="flex justify-end">
                 <button type="submit" class="btn-copper py-2 px-4 text-xs">Guardar</button>

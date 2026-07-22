@@ -43,7 +43,7 @@ class ProductAdminController extends Controller
             'price'             => 'required|integer|min:0',
             'original_price'    => 'nullable|integer|min:0',
             'stock'             => 'required|integer|min:0',
-            'image'             => 'nullable|image|max:5120',
+            'image'             => 'nullable|string|max:2048',
             'is_active'         => 'boolean',
             'is_featured'       => 'boolean',
             'is_new'            => 'boolean',
@@ -51,13 +51,10 @@ class ProductAdminController extends Controller
             'meta_description'  => 'nullable|string|max:500',
             'colors'            => 'nullable|array',
             'colors.*'          => 'nullable|string|max:50',
-            'gallery'           => 'nullable|array',
-            'gallery.*'         => 'nullable|image|max:5120',
+            'gallery_images'    => 'nullable|array',
+            'gallery_images.*'  => 'nullable|string|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
-        }
         $data['is_active']  = $request->boolean('is_active');
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_new']     = $request->boolean('is_new');
@@ -70,11 +67,8 @@ class ProductAdminController extends Controller
             }
         }
 
-        if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $i => $file) {
-                $path = $file->store('products/gallery', 'public');
-                ProductImage::create(['product_id' => $product->id, 'path' => $path, 'order' => $i]);
-            }
+        foreach (array_filter($request->input('gallery_images', [])) as $i => $url) {
+            ProductImage::create(['product_id' => $product->id, 'path' => $url, 'order' => $i]);
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado correctamente.');
@@ -98,22 +92,37 @@ class ProductAdminController extends Controller
             'price'             => 'required|integer|min:0',
             'original_price'    => 'nullable|integer|min:0',
             'stock'             => 'required|integer|min:0',
-            'image'             => 'nullable|image|max:5120',
+            'image'             => 'nullable|string|max:2048',
             'is_active'         => 'boolean',
             'is_featured'       => 'boolean',
             'is_new'            => 'boolean',
             'meta_title'        => 'nullable|string|max:200',
             'meta_description'  => 'nullable|string|max:500',
+            'colors'            => 'nullable|array',
+            'colors.*'          => 'nullable|string|max:50',
+            'gallery_images'    => 'nullable|array',
+            'gallery_images.*'  => 'nullable|string|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
-        }
         $data['is_active']   = $request->boolean('is_active');
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_new']      = $request->boolean('is_new');
 
         $product->update($data);
+
+        if ($request->has('colors')) {
+            $product->colors()->delete();
+            foreach (array_filter($request->input('colors', [])) as $color) {
+                $product->colors()->create(['name' => $color]);
+            }
+        }
+
+        if ($request->has('gallery_images')) {
+            $product->images()->delete();
+            foreach (array_filter($request->input('gallery_images', [])) as $i => $url) {
+                ProductImage::create(['product_id' => $product->id, 'path' => $url, 'order' => $i]);
+            }
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado correctamente.');
     }

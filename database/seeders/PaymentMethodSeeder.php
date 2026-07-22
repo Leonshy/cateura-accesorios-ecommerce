@@ -9,7 +9,7 @@ class PaymentMethodSeeder extends Seeder
     {
         $methods = [
             ['key' => 'transferencia', 'name' => 'Transferencia bancaria', 'credentials' => [], 'is_active' => true, 'sandbox' => false, 'order' => 1],
-            ['key' => 'pagopar',       'name' => 'Pagopar',  'credentials' => ['api_key' => '', 'public_key' => ''], 'is_active' => false, 'sandbox' => true, 'order' => 2],
+            ['key' => 'pagopar',       'name' => 'Pagopar',  'credentials' => ['public_key' => '', 'private_key' => ''], 'is_active' => false, 'sandbox' => true, 'order' => 2],
             ['key' => 'bancard',       'name' => 'Bancard',  'credentials' => ['private_key' => '', 'public_key' => ''], 'is_active' => false, 'sandbox' => true, 'order' => 3],
         ];
 

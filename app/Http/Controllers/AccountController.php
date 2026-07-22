@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
-    public function __construct() { $this->middleware('auth'); }
-
     public function index()
     {
         $user = auth()->user();
@@ -49,7 +47,9 @@ class AccountController extends Controller
             return back()->with('success', 'Producto eliminado de tu lista de deseos.');
         }
         Wishlist::create(['user_id' => auth()->id(), 'product_id' => $request->product_id]);
-        return back()->with('success', '¡Producto añadido a tu lista de deseos!');
+        return back()->with('success', '¡Producto añadido a tu lista de deseos!')
+            ->with('success_link', route('account.wishlist'))
+            ->with('success_link_label', 'Ver lista de deseos');
     }
 
     public function addresses()

@@ -26,13 +26,10 @@ class ArtisanAdminController extends Controller
             'bio'              => 'required|string',
             'quote'            => 'nullable|string|max:300',
             'years_experience' => 'nullable|integer|min:0',
-            'photo'            => 'nullable|image|max:5120',
+            'photo'            => 'nullable|string|max:2048',
             'is_active'        => 'boolean',
             'order'            => 'nullable|integer',
         ]);
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('artisans', 'public');
-        }
         $data['is_active'] = $request->boolean('is_active');
         Artisan::create($data);
         return redirect()->route('admin.artisans.index')->with('success', 'Artesana creada correctamente.');
@@ -51,13 +48,10 @@ class ArtisanAdminController extends Controller
             'bio'              => 'required|string',
             'quote'            => 'nullable|string|max:300',
             'years_experience' => 'nullable|integer|min:0',
-            'photo'            => 'nullable|image|max:5120',
+            'photo'            => 'nullable|string|max:2048',
             'is_active'        => 'boolean',
             'order'            => 'nullable|integer',
         ]);
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('artisans', 'public');
-        }
         $data['is_active'] = $request->boolean('is_active');
         $artisan->update($data);
         return redirect()->route('admin.artisans.index')->with('success', 'Artesana actualizada.');

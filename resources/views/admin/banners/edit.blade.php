@@ -5,12 +5,6 @@
 <form action="{{ route('admin.banners.update', $banner) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
     @csrf @method('PUT')
     <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
-        @if($banner->image)
-        <div class="mb-2">
-            <img src="{{ asset('storage/' . $banner->image) }}" alt="" class="w-full h-32 object-cover">
-            <p class="text-xs text-stone-400 mt-1">Imagen actual</p>
-        </div>
-        @endif
         <div>
             <label class="block text-xs font-medium text-stone-600 mb-1">Título *</label>
             <input type="text" name="title" value="{{ old('title', $banner->title) }}" required class="input-cateura border p-2 w-full">
@@ -29,10 +23,7 @@
                 <input type="text" name="cta_url" value="{{ old('cta_url', $banner->cta_url) }}" class="input-cateura border p-2 w-full">
             </div>
         </div>
-        <div>
-            <label class="block text-xs font-medium text-stone-600 mb-1">Reemplazar imagen</label>
-            <input type="file" name="image" accept="image/*" class="text-sm text-stone-600 file:mr-3 file:px-4 file:py-2 file:border-0 file:bg-copper-50 file:text-copper-600 file:text-xs file:cursor-pointer">
-        </div>
+        <x-admin.media-picker name="image" value="{{ old('image', $banner->image) }}" label="Imagen" />
         <div>
             <label class="block text-xs font-medium text-stone-600 mb-1">Orden</label>
             <input type="number" name="order" value="{{ old('order', $banner->order) }}" min="0" class="input-cateura border p-2 w-full w-24">

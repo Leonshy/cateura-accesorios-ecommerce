@@ -58,29 +58,8 @@
 
             <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
                 <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Imágenes</h3>
-                @if($product->image)
-                <div class="mb-3">
-                    <p class="text-xs text-stone-500 mb-1">Imagen actual:</p>
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="" class="w-24 h-24 object-cover border border-stone-100">
-                </div>
-                @endif
-                <div>
-                    <label class="block text-xs font-medium text-stone-600 mb-1">Reemplazar imagen principal</label>
-                    <input type="file" name="image" accept="image/*" class="text-sm text-stone-600 file:mr-3 file:px-4 file:py-2 file:border-0 file:bg-copper-50 file:text-copper-600 file:text-xs file:cursor-pointer">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-stone-600 mb-1">Agregar a galería</label>
-                    <input type="file" name="gallery[]" accept="image/*" multiple class="text-sm text-stone-600 file:mr-3 file:px-4 file:py-2 file:border-0 file:bg-stone-50 file:text-stone-600 file:text-xs file:cursor-pointer">
-                </div>
-                @if($product->images && $product->images->count())
-                <div class="flex flex-wrap gap-2 mt-2">
-                    @foreach($product->images as $img)
-                    <div class="relative">
-                        <img src="{{ asset('storage/' . $img->image_path) }}" alt="" class="w-16 h-16 object-cover border border-stone-100">
-                    </div>
-                    @endforeach
-                </div>
-                @endif
+                <x-admin.media-picker name="image" value="{{ old('image', $product->image) }}" label="Imagen principal" />
+                <x-admin.media-picker-multi name="gallery_images" :values="old('gallery_images', $product->images->pluck('path')->all())" label="Galería (múltiple)" />
             </div>
 
             <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
@@ -119,7 +98,7 @@
                     @if($product->colors && $product->colors->count())
                         @foreach($product->colors as $color)
                         <div class="flex gap-2">
-                            <input type="text" name="colors[]" value="{{ $color->color }}" class="input-cateura border p-2 flex-1 text-sm">
+                            <input type="text" name="colors[]" value="{{ $color->name }}" class="input-cateura border p-2 flex-1 text-sm">
                         </div>
                         @endforeach
                     @else

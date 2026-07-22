@@ -7,7 +7,7 @@
             <div class="flex-shrink-0 text-center">
                 <div class="w-48 h-48 rounded-full overflow-hidden mx-auto border-4 border-copper-100">
                     @if($artisan->photo)
-                    <img src="{{ asset('storage/' . $artisan->photo) }}" alt="{{ $artisan->name }}" class="w-full h-full object-cover">
+                    <img src="{{ $artisan->photo_url }}" alt="{{ $artisan->name }}" class="w-full h-full object-cover">
                     @else
                     <div class="w-full h-full bg-copper-100 flex items-center justify-center text-copper-500 text-7xl font-display">{{ substr($artisan->name, 0, 1) }}</div>
                     @endif

@@ -7,6 +7,9 @@
     <title>@yield('title', 'Cateura Accesorios') — Diseño artesanal que transforma historias</title>
     <meta name="description" content="@yield('meta_description', 'Accesorios, piezas decorativas y prendas creadas por artesanas del Bañado Sur a partir de materiales reciclados.')">
     @stack('meta')
+    @if($favicon = \App\Models\SiteSetting::get('site_favicon'))
+    <link rel="icon" href="{{ media_url($favicon) }}">
+    @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if(\App\Models\SiteSetting::get('ga_active') && \App\Models\SiteSetting::get('google_analytics_id'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ \App\Models\SiteSetting::get('google_analytics_id') }}"></script>
@@ -38,13 +41,16 @@
 
 <main>
     @if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" class="fixed top-20 right-4 z-50 bg-green-600 text-white px-5 py-3 shadow-lg text-sm flex items-center gap-3 max-w-sm" style="display:none;">
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="fixed top-28 md:top-40 right-4 z-50 bg-green-600 text-white px-5 py-3 shadow-lg text-sm flex items-center gap-3 max-w-sm" style="display:none;">
         <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-        {{ session('success') }}
+        <span class="flex-1">{{ session('success') }}</span>
+        @if(session('success_link'))
+        <a href="{{ session('success_link') }}" class="underline decoration-white/50 hover:decoration-white font-medium whitespace-nowrap flex-shrink-0">{{ session('success_link_label', 'Ver') }}</a>
+        @endif
     </div>
     @endif
     @if(session('error'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="fixed top-20 right-4 z-50 bg-red-600 text-white px-5 py-3 shadow-lg text-sm flex items-center gap-3 max-w-sm" style="display:none;">
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="fixed top-28 md:top-40 right-4 z-50 bg-red-600 text-white px-5 py-3 shadow-lg text-sm flex items-center gap-3 max-w-sm" style="display:none;">
         <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-9v4a1 1 0 102 0V9a1 1 0 10-2 0zm1-4a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/></svg>
         {{ session('error') }}
     </div>

@@ -3,7 +3,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
             {{-- Brand --}}
             <div class="lg:col-span-1">
-                <img src="{{ asset('assets/brand/logo-horizontal-white.png') }}" alt="Cateura Accesorios" class="h-16 w-auto mb-4">
+                <img src="{{ media_url(\App\Models\SiteSetting::get('site_logo_footer'), asset('assets/brand/logo-horizontal-white.png')) }}" alt="Cateura Accesorios" class="h-16 w-auto mb-4">
                 <p class="text-sm leading-relaxed text-stone-400 mb-6">Accesorios, piezas decorativas y prendas creadas por artesanas del Bañado Sur a partir de materiales reciclados.</p>
                 <div class="flex gap-4">
                     <a href="https://www.instagram.com/cateurapy" target="_blank" rel="noopener" class="text-stone-400 hover:text-copper-400 transition-colors" aria-label="Instagram">

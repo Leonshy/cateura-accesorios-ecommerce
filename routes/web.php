@@ -12,9 +12,11 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Admin\ArtisanAdminController;
 use App\Http\Controllers\Admin\BannerAdminController;
 use App\Http\Controllers\Admin\CategoryAdminController;
+use App\Http\Controllers\Admin\SubcategoryAdminController;
 use App\Http\Controllers\Admin\ContactAdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LegalAdminController;
+use App\Http\Controllers\Admin\MediaAdminController;
 use App\Http\Controllers\Admin\NewsletterAdminController;
 use App\Http\Controllers\Admin\OrderAdminController;
 use App\Http\Controllers\Admin\PostAdminController;
@@ -65,8 +67,12 @@ Route::prefix('carrito')->name('cart.')->group(function () {
 // ─── Checkout ────────────────────────────────────────────────────────────────
 Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
+    Route::post('/shipping', [CheckoutController::class, 'calculateShipping'])->name('shipping');
     Route::post('/', [CheckoutController::class, 'store'])->name('store');
     Route::get('/confirmacion/{orderNumber}', [CheckoutController::class, 'confirmation'])->name('confirmation');
+    Route::get('/pagopar/retorno/{hash}', [CheckoutController::class, 'pagoparReturn'])->name('pagopar.return');
+    Route::post('/webhooks/bancard', [CheckoutController::class, 'bancardWebhook'])->name('webhooks.bancard');
+    Route::post('/webhooks/pagopar', [CheckoutController::class, 'pagoparWebhook'])->name('webhooks.pagopar');
 });
 
 // ─── Mi cuenta (clientes autenticados) ───────────────────────────────────────
@@ -87,11 +93,25 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
 
+    // Multimedia
+    Route::prefix('multimedia')->name('media.')->group(function () {
+        Route::get('/', [MediaAdminController::class, 'index'])->name('index');
+        Route::post('/upload', [MediaAdminController::class, 'upload'])->name('upload');
+        Route::get('/picker', [MediaAdminController::class, 'picker'])->name('picker');
+        Route::patch('/{media}/alt', [MediaAdminController::class, 'updateAlt'])->name('alt');
+        Route::delete('/{media}', [MediaAdminController::class, 'destroy'])->name('destroy');
+    });
+
     // Productos
     Route::resource('products', ProductAdminController::class)->names('products');
 
     // Categorías
     Route::resource('categories', CategoryAdminController::class)->names('categories');
+
+    // Subcategorías
+    Route::post('categories/{category}/subcategories', [SubcategoryAdminController::class, 'store'])->name('subcategories.store');
+    Route::patch('subcategories/{subcategory}', [SubcategoryAdminController::class, 'update'])->name('subcategories.update');
+    Route::delete('subcategories/{subcategory}', [SubcategoryAdminController::class, 'destroy'])->name('subcategories.destroy');
 
     // Artesanas
     Route::resource('artisans', ArtisanAdminController::class)->names('artisans');
@@ -124,6 +144,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/legal', [LegalAdminController::class, 'index'])->name('legal.index');
     Route::get('/legal/{key}/edit', [LegalAdminController::class, 'edit'])->name('legal.edit');
     Route::patch('/legal/{key}', [LegalAdminController::class, 'update'])->name('legal.update');
+
+    // Contenido de páginas
+    Route::get('/contenido', [SettingsAdminController::class, 'content'])->name('settings.content');
+    Route::post('/contenido', [SettingsAdminController::class, 'updateContent'])->name('settings.content.update');
 
     // Configuración
     Route::get('/configuracion', [SettingsAdminController::class, 'general'])->name('settings.general');

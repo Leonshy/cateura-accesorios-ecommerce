@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             BannerSeeder::class,
             SiteSettingSeeder::class,
             PaymentMethodSeeder::class,
-            ShippingMethodSeeder::class,
             LegalPageSeeder::class,
         ]);
     }

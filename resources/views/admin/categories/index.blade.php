@@ -21,7 +21,7 @@
                 <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
                         @if($cat->image)
-                        <img src="{{ asset('storage/' . $cat->image) }}" alt="" class="w-10 h-10 object-cover">
+                        <img src="{{ media_url($cat->image) }}" alt="" class="w-10 h-10 object-cover">
                         @else
                         <div class="w-10 h-10 bg-stone-100"></div>
                         @endif

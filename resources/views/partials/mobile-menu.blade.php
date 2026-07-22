@@ -1,6 +1,6 @@
 <div class="flex flex-col h-full">
     <div class="flex items-center justify-between px-4 py-4 border-b border-stone-100">
-        <img src="{{ asset('assets/brand/logo-horizontal.png') }}" alt="Cateura Accesorios" class="h-8 w-auto">
+        <img src="{{ media_url(\App\Models\SiteSetting::get('site_logo'), asset('assets/brand/logo-horizontal.png')) }}" alt="Cateura Accesorios" class="h-8 w-auto">
         <button @click="mobileMenuOpen = false" class="p-2 text-stone-500" aria-label="Cerrar menú">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>

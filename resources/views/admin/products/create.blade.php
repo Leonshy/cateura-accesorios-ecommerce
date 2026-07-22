@@ -58,14 +58,8 @@
 
             <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
                 <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Imágenes</h3>
-                <div>
-                    <label class="block text-xs font-medium text-stone-600 mb-1">Imagen principal *</label>
-                    <input type="file" name="image" accept="image/*" class="text-sm text-stone-600 file:mr-3 file:px-4 file:py-2 file:border-0 file:bg-copper-50 file:text-copper-600 file:text-xs file:cursor-pointer">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-stone-600 mb-1">Galería (múltiple)</label>
-                    <input type="file" name="gallery[]" accept="image/*" multiple class="text-sm text-stone-600 file:mr-3 file:px-4 file:py-2 file:border-0 file:bg-stone-50 file:text-stone-600 file:text-xs file:cursor-pointer">
-                </div>
+                <x-admin.media-picker name="image" value="{{ old('image') }}" label="Imagen principal" />
+                <x-admin.media-picker-multi name="gallery_images" :values="old('gallery_images', [])" label="Galería (múltiple)" />
             </div>
 
             <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">

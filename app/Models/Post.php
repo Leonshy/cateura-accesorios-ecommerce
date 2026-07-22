@@ -27,4 +27,9 @@ class Post extends Model
     public function scopePublished($q) { return $q->where('status', 'publicado'); }
     public function scopeNoticias($q) { return $q->where('type', 'noticia'); }
     public function scopeEventos($q) { return $q->where('type', 'evento'); }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? media_url($this->image) : null;
+    }
 }

@@ -26,4 +26,9 @@ class Category extends Model
     }
 
     public function scopeActive($q) { return $q->where('is_active', true); }
+
+    public function getImageUrlAttribute(): string
+    {
+        return $this->image ? media_url($this->image) : asset('assets/images/placeholder-product.jpg');
+    }
 }

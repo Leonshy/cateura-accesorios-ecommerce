@@ -24,13 +24,10 @@ class CategoryAdminController extends Controller
         $data = $request->validate([
             'name'        => 'required|string|max:100',
             'description' => 'nullable|string',
-            'image'       => 'nullable|image|max:5120',
+            'image'       => 'nullable|string|max:2048',
             'order'       => 'nullable|integer|min:0',
             'is_active'   => 'nullable|boolean',
         ]);
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('categories', 'public');
-        }
         $data['is_active'] = $request->boolean('is_active');
         Category::create($data);
         return redirect()->route('admin.categories.index')->with('success', 'Categoría creada.');
@@ -38,6 +35,7 @@ class CategoryAdminController extends Controller
 
     public function edit(Category $category)
     {
+        $category->load(['subcategories' => fn ($q) => $q->orderBy('order')]);
         return view('admin.categories.edit', compact('category'));
     }
 
@@ -46,13 +44,10 @@ class CategoryAdminController extends Controller
         $data = $request->validate([
             'name'        => 'required|string|max:100',
             'description' => 'nullable|string',
-            'image'       => 'nullable|image|max:5120',
+            'image'       => 'nullable|string|max:2048',
             'order'       => 'nullable|integer|min:0',
             'is_active'   => 'nullable|boolean',
         ]);
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('categories', 'public');
-        }
         $data['is_active'] = $request->boolean('is_active');
         $category->update($data);
         return redirect()->route('admin.categories.index')->with('success', 'Categoría actualizada.');

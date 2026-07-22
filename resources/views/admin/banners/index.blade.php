@@ -10,7 +10,7 @@
     <div class="bg-white border border-stone-100 shadow-sm p-4 flex items-center gap-4">
         <div class="w-24 h-14 bg-stone-100 overflow-hidden flex-shrink-0">
             @if($banner->image)
-            <img src="{{ asset('storage/' . $banner->image) }}" alt="" class="w-full h-full object-cover">
+            <img src="{{ $banner->image_url }}" alt="" class="w-full h-full object-cover">
             @endif
         </div>
         <div class="flex-1 min-w-0">

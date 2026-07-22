@@ -15,7 +15,7 @@
         </div>
         @if($post->image)
         <div class="mb-8 aspect-[16/7] overflow-hidden">
-            <img src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
+            <img src="{{ $post->image_url }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
         </div>
         @endif
         @if($post->content)

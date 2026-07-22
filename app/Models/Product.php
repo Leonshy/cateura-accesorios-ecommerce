@@ -55,7 +55,7 @@ class Product extends Model
     public function getMainImageAttribute(): string
     {
         return $this->image
-            ? asset('storage/' . $this->image)
+            ? media_url($this->image)
             : asset('assets/images/placeholder-product.jpg');
     }
 }

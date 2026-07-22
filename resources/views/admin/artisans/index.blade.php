@@ -10,7 +10,7 @@
     <div class="bg-white border border-stone-100 shadow-sm p-4 flex items-center gap-4">
         <div class="w-16 h-16 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
             @if($artisan->photo)
-            <img src="{{ asset('storage/' . $artisan->photo) }}" alt="{{ $artisan->name }}" class="w-full h-full object-cover">
+            <img src="{{ $artisan->photo_url }}" alt="{{ $artisan->name }}" class="w-full h-full object-cover">
             @else
             <div class="w-full h-full flex items-center justify-center text-stone-400 text-2xl font-display">{{ substr($artisan->name, 0, 1) }}</div>
             @endif

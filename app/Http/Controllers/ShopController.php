@@ -35,7 +35,7 @@ class ShopController extends Controller
             default       => $q->latest(),
         }, fn($q) => $q->latest());
 
-        $products = $query->paginate(12)->withQueryString();
+        $products = $query->paginate(24)->withQueryString();
         $categories = Category::active()->with('subcategories')->orderBy('order')->get();
         $currentCategory = $request->filled('categoria')
             ? Category::where('slug', $request->categoria)->first()

@@ -38,7 +38,7 @@
 
             {{-- Logo --}}
             <a href="{{ route('home') }}" class="flex items-center gap-3">
-                <img src="{{ asset('assets/brand/logo-horizontal.png') }}" alt="Cateura Accesorios" class="h-14 md:h-20 w-auto">
+                <img src="{{ media_url(\App\Models\SiteSetting::get('site_logo'), asset('assets/brand/logo-horizontal.png')) }}" alt="Cateura Accesorios" class="h-14 md:h-20 w-auto">
             </a>
 
             {{-- Desktop Navigation --}}
