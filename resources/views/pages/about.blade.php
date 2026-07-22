@@ -45,28 +45,16 @@
             <p class="section-subtitle mb-2">{{ $c['about_valores_eyebrow'] ?? 'Lo que nos mueve' }}</p>
             <h2 class="section-title">{{ $c['about_valores_title'] ?? 'Nuestros valores' }}</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            @foreach($aboutValues as $value)
             <div class="text-center">
                 <div class="flex justify-center mb-4">
-                    <svg class="w-10 h-10 text-copper-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                    <svg class="w-10 h-10 text-copper-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ \App\Models\AboutValue::iconSvgPath($value->icon) }}"/></svg>
                 </div>
-                <h3 class="font-display text-xl text-stone-800 mb-3">{{ $c['about_valor1_title'] ?? 'Sostenibilidad' }}</h3>
-                <p class="text-stone-500 text-sm leading-relaxed">{{ $c['about_valor1_text'] ?? 'Trabajamos con materiales reciclados para crear productos que cuidan el medio ambiente y reducen los residuos en nuestra comunidad.' }}</p>
+                <h3 class="font-display text-xl text-stone-800 mb-3">{{ $value->title }}</h3>
+                <p class="text-stone-500 text-sm leading-relaxed">{{ $value->text }}</p>
             </div>
-            <div class="text-center">
-                <div class="flex justify-center mb-4">
-                    <svg class="w-10 h-10 text-copper-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-                </div>
-                <h3 class="font-display text-xl text-stone-800 mb-3">{{ $c['about_valor2_title'] ?? 'Comercio justo' }}</h3>
-                <p class="text-stone-500 text-sm leading-relaxed">{{ $c['about_valor2_text'] ?? 'Cada venta impacta directamente en la economía de las artesanas y sus familias, garantizando un precio justo por su trabajo.' }}</p>
-            </div>
-            <div class="text-center">
-                <div class="flex justify-center mb-4">
-                    <svg class="w-10 h-10 text-copper-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"/></svg>
-                </div>
-                <h3 class="font-display text-xl text-stone-800 mb-3">{{ $c['about_valor3_title'] ?? 'Arte y tradición' }}</h3>
-                <p class="text-stone-500 text-sm leading-relaxed">{{ $c['about_valor3_text'] ?? 'Fusionamos técnicas artesanales tradicionales con diseños contemporáneos para crear piezas únicas con identidad paraguaya.' }}</p>
-            </div>
+            @endforeach
         </div>
     </div>
 </section>

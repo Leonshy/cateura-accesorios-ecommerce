@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\Admin\AboutValueAdminController;
 use App\Http\Controllers\Admin\ArtisanAdminController;
 use App\Http\Controllers\Admin\BannerAdminController;
 use App\Http\Controllers\Admin\CategoryAdminController;
@@ -43,7 +44,9 @@ Route::prefix('noticias')->group(function () {
     Route::get('/{slug}', [PostController::class, 'show'])->name('posts.show');
 });
 
-Route::get('/nosotros', fn() => view('pages.about'))->name('about');
+Route::get('/nosotros', fn() => view('pages.about', [
+    'aboutValues' => \App\Models\AboutValue::active()->orderBy('order')->get(),
+]))->name('about');
 Route::get('/contacto', [ContactController::class, 'index'])->name('contact');
 Route::post('/contacto', [ContactController::class, 'store'])->name('contact.store');
 Route::post('/newsletter', [ContactController::class, 'newsletter'])->name('newsletter.subscribe');
@@ -148,6 +151,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Contenido de páginas
     Route::get('/contenido', [SettingsAdminController::class, 'content'])->name('settings.content');
     Route::post('/contenido', [SettingsAdminController::class, 'updateContent'])->name('settings.content.update');
+
+    // Valores (página Nosotros)
+    Route::post('valores', [AboutValueAdminController::class, 'store'])->name('about-values.store');
+    Route::patch('valores/{aboutValue}', [AboutValueAdminController::class, 'update'])->name('about-values.update');
+    Route::delete('valores/{aboutValue}', [AboutValueAdminController::class, 'destroy'])->name('about-values.destroy');
 
     // Configuración
     Route::get('/configuracion', [SettingsAdminController::class, 'general'])->name('settings.general');

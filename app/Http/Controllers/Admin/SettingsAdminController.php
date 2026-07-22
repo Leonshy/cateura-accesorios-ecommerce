@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AboutValue;
 use App\Models\PaymentMethod;
 use App\Models\ShippingSetting;
 use App\Models\SiteSetting;
@@ -38,7 +39,8 @@ class SettingsAdminController extends Controller
     public function content()
     {
         $settings = SiteSetting::group('content');
-        return view('admin.settings.content', compact('settings'));
+        $aboutValues = AboutValue::orderBy('order')->get();
+        return view('admin.settings.content', compact('settings', 'aboutValues'));
     }
 
     public function updateContent(Request $request)
@@ -61,9 +63,6 @@ class SettingsAdminController extends Controller
             'about_historia_eyebrow', 'about_historia_title',
             'about_historia_text1', 'about_historia_text2', 'about_historia_text3',
             'about_valores_eyebrow', 'about_valores_title',
-            'about_valor1_title', 'about_valor1_text',
-            'about_valor2_title', 'about_valor2_text',
-            'about_valor3_title', 'about_valor3_text',
             'about_cta_title', 'about_cta_text',
             'historia_img1', 'historia_img2', 'historia_img3', 'historia_img4', 'about_hero_image',
         ];

@@ -123,21 +123,89 @@
                 <input type="text" name="about_valores_title" value="{{ $settings['about_valores_title'] ?? 'Nuestros valores' }}" class="input-cateura border p-2 w-full">
             </div>
         </div>
-        @php
-            $defaultValores = [
-                1 => ['Sostenibilidad', 'Trabajamos con materiales reciclados para crear productos que cuidan el medio ambiente y reducen los residuos en nuestra comunidad.'],
-                2 => ['Comercio justo', 'Cada venta impacta directamente en la economía de las artesanas y sus familias, garantizando un precio justo por su trabajo.'],
-                3 => ['Arte y tradición', 'Fusionamos técnicas artesanales tradicionales con diseños contemporáneos para crear piezas únicas con identidad paraguaya.'],
-            ];
-        @endphp
-        @foreach($defaultValores as $i => [$defaultTitle, $defaultText])
-        <div class="border-t border-stone-100 pt-4">
-            <label class="block text-xs font-medium text-stone-600 mb-1">Valor {{ $i }} — título</label>
-            <input type="text" name="about_valor{{ $i }}_title" value="{{ $settings['about_valor'.$i.'_title'] ?? $defaultTitle }}" class="input-cateura border p-2 w-full mb-2">
-            <label class="block text-xs font-medium text-stone-600 mb-1">Valor {{ $i }} — texto</label>
-            <textarea name="about_valor{{ $i }}_text" rows="2" class="input-cateura border p-2 w-full">{{ $settings['about_valor'.$i.'_text'] ?? $defaultText }}</textarea>
+    </div>
+
+    <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
+        <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Página "Nosotros" — Lista de valores (en escritorio se muestran 4 por fila)</h3>
+
+        @if(session('success'))
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm">{{ session('success') }}</div>
+        @endif
+
+        <div class="space-y-3">
+            @forelse($aboutValues as $value)
+            <div class="border border-stone-100 p-4 space-y-3">
+                <form action="{{ route('admin.about-values.update', $value) }}" method="POST" class="space-y-3">
+                    @csrf @method('PATCH')
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+                            <input type="text" name="title" value="{{ $value->title }}" class="input-cateura border p-2 w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-stone-600 mb-1">Ícono</label>
+                            <select name="icon" class="input-cateura border p-2 w-full text-sm bg-white">
+                                @foreach(\App\Models\AboutValue::iconOptions() as $key => $label)
+                                <option value="{{ $key }}" {{ $value->icon === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Texto</label>
+                        <textarea name="text" rows="2" class="input-cateura border p-2 w-full text-sm">{{ $value->text }}</textarea>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-stone-600 mb-1">Orden</label>
+                            <input type="number" name="order" value="{{ $value->order }}" min="0" class="input-cateura border p-2 w-20 text-sm">
+                        </div>
+                        <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer">
+                            <input type="checkbox" name="is_active" value="1" {{ $value->is_active ? 'checked' : '' }} class="text-copper-500">
+                            Activo
+                        </label>
+                        <button type="submit" class="btn-copper py-1.5 px-3 text-xs ml-auto">Guardar</button>
+                    </div>
+                </form>
+                <form action="{{ route('admin.about-values.destroy', $value) }}" method="POST" onsubmit="return confirm('¿Eliminar este valor?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="text-xs text-stone-400 hover:text-red-500">Eliminar "{{ $value->title }}"</button>
+                </form>
+            </div>
+            @empty
+            <p class="text-sm text-stone-400 py-2">Todavía no hay valores cargados.</p>
+            @endforelse
         </div>
-        @endforeach
+
+        <form action="{{ route('admin.about-values.store') }}" method="POST" class="border-t border-stone-100 pt-4 space-y-3">
+            @csrf
+            <p class="text-sm font-medium text-stone-700">Agregar nuevo valor</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+                    <input type="text" name="title" required class="input-cateura border p-2 w-full text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">Ícono</label>
+                    <select name="icon" class="input-cateura border p-2 w-full text-sm bg-white">
+                        @foreach(\App\Models\AboutValue::iconOptions() as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-600 mb-1">Texto</label>
+                <textarea name="text" rows="2" required class="input-cateura border p-2 w-full text-sm"></textarea>
+            </div>
+            <div class="flex items-center gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">Orden</label>
+                    <input type="number" name="order" value="{{ $aboutValues->count() + 1 }}" min="0" class="input-cateura border p-2 w-20 text-sm">
+                </div>
+                <button type="submit" class="btn-copper py-2 px-4 text-xs ml-auto">+ Agregar valor</button>
+            </div>
+        </form>
     </div>
 
     <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
