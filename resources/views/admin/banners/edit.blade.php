@@ -10,8 +10,12 @@
             <input type="text" name="title" value="{{ old('title', $banner->title) }}" required class="input-cateura border p-2 w-full">
         </div>
         <div>
-            <label class="block text-xs font-medium text-stone-600 mb-1">Subtítulo</label>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Subtítulo (texto corto arriba del título, ej: "Colección artesanal")</label>
             <input type="text" name="subtitle" value="{{ old('subtitle', $banner->subtitle) }}" class="input-cateura border p-2 w-full">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Descripción (párrafo debajo del título)</label>
+            <textarea name="description" rows="2" class="input-cateura border p-2 w-full">{{ old('description', $banner->description) }}</textarea>
         </div>
         <div class="grid grid-cols-2 gap-4">
             <div>

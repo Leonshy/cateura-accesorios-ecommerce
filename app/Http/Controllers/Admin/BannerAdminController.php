@@ -24,6 +24,7 @@ class BannerAdminController extends Controller
         $data = $request->validate([
             'title'       => 'required|string|max:255',
             'subtitle'    => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:1000',
             'cta_label' => 'nullable|string|max:100',
             'cta_url'  => 'nullable|string|max:255',
             'image'       => 'required|string|max:2048',
@@ -46,6 +47,7 @@ class BannerAdminController extends Controller
         $data = $request->validate([
             'title'       => 'required|string|max:255',
             'subtitle'    => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:1000',
             'cta_label' => 'nullable|string|max:100',
             'cta_url'  => 'nullable|string|max:255',
             'image'       => 'nullable|string|max:2048',

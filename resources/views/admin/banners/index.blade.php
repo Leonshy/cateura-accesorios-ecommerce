@@ -15,7 +15,7 @@
         </div>
         <div class="flex-1 min-w-0">
             <p class="font-medium text-stone-700">{{ $banner->title }}</p>
-            <p class="text-xs text-stone-400">{{ $banner->subtitle }}</p>
+            <p class="text-xs text-stone-400">{{ $banner->description }}</p>
             <div class="flex gap-2 mt-1">
                 <span class="text-xs {{ $banner->is_active ? 'bg-green-100 text-green-600' : 'bg-stone-100 text-stone-500' }} px-2 py-0.5">{{ $banner->is_active ? 'Activo' : 'Inactivo' }}</span>
                 <span class="text-xs bg-stone-100 text-stone-500 px-2 py-0.5">Orden: {{ $banner->order }}</span>

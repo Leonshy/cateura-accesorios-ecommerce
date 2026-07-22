@@ -22,10 +22,10 @@
                  class="w-full h-full object-cover" style="min-height:480px;">
             <div class="absolute inset-0 flex items-center" style="background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.50) 60%, rgba(0,0,0,0.30) 100%)">
                 <div class="max-w-7xl mx-auto px-8 py-20">
-                    <p class="section-subtitle text-copper-300 mb-3">Colección artesanal</p>
+                    <p class="section-subtitle text-copper-300 mb-3">{{ $banner->subtitle ?? 'Colección artesanal' }}</p>
                     <h1 class="font-display text-4xl md:text-6xl text-white font-medium leading-tight mb-4 max-w-2xl">{{ $banner->title }}</h1>
-                    @if($banner->subtitle)
-                    <p class="text-stone-200 text-lg mb-8 max-w-lg">{{ $banner->subtitle }}</p>
+                    @if($banner->description)
+                    <p class="text-stone-200 text-lg mb-8 max-w-lg">{{ $banner->description }}</p>
                     @endif
                     @if($banner->cta_url)
                     <div class="flex flex-wrap gap-4">
