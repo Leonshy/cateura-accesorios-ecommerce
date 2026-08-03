@@ -21,7 +21,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/">
-                    <img src="{{ media_url(\App\Models\SiteSetting::get('site_logo'), asset('assets/brand/logo-horizontal.png')) }}" alt="Cateura Accesorios" class="h-16 w-auto">
+                    <img src="{{ media_url(\App\Models\SiteSetting::get('site_logo'), asset('assets/brand/logo-horizontal.png')) }}" alt="Cateura Accesorios" class="h-20 w-auto">
                 </a>
             </div>
 
