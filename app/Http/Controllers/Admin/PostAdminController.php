@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 
 class PostAdminController extends Controller
@@ -31,6 +32,7 @@ class PostAdminController extends Controller
             'status'       => 'nullable|in:publicado,borrador',
         ]);
         $data['status'] = $request->input('status', 'borrador');
+        $data['content'] = HtmlSanitizer::clean($data['content'] ?? null);
         Post::create($data);
         return redirect()->route('admin.posts.index')->with('success', 'Publicación creada.');
     }
@@ -52,6 +54,7 @@ class PostAdminController extends Controller
             'status'       => 'nullable|in:publicado,borrador',
         ]);
         $data['status'] = $request->input('status', 'borrador');
+        $data['content'] = HtmlSanitizer::clean($data['content'] ?? null);
         $post->update($data);
         return redirect()->route('admin.posts.index')->with('success', 'Publicación actualizada.');
     }

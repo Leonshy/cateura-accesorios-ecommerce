@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $fillable = [
-        'order_number','user_id','guest_token',
+        'order_number','user_id','cart_id','guest_token',
         'customer_name','customer_email','customer_phone','customer_ci',
         'address_line1','address_city','address_department','address_country','address_notes',
         'billing_ruc','billing_name',
@@ -17,6 +17,7 @@ class Order extends Model
     protected $casts = ['shipping_cost' => 'integer'];
 
     public function user() { return $this->belongsTo(User::class); }
+    public function cart() { return $this->belongsTo(Cart::class); }
     public function items() { return $this->hasMany(OrderItem::class); }
 
     public static function generateNumber(): string

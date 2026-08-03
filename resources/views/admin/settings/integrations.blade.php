@@ -17,7 +17,18 @@
                     <span class="text-sm text-stone-600">Activo</span>
                 </label>
             </div>
-            @if($method->key !== 'transferencia')
+            @if($method->key === 'transferencia')
+            <p class="text-xs text-stone-400 -mt-2">Estos datos se muestran al cliente en el checkout apenas elige "Transferencia bancaria", para que sepa a qué cuenta transferir antes de subir su comprobante.</p>
+            @php
+                $bankLabels = ['bank_name' => 'Banco', 'bank_account' => 'Número de cuenta', 'bank_titular' => 'Titular de la cuenta', 'bank_ci' => 'CI del titular'];
+            @endphp
+            @foreach($bankLabels as $key => $label)
+            <div>
+                <label class="block text-xs font-medium text-stone-600 mb-1">{{ $label }}</label>
+                <input type="text" name="credentials[{{ $key }}]" value="{{ $method->credentials[$key] ?? '' }}" class="input-cateura border p-2 w-full">
+            </div>
+            @endforeach
+            @else
             <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="sandbox" value="1" {{ $method->sandbox ? 'checked' : '' }} class="text-copper-500">
                 <span class="text-sm text-stone-600">Modo sandbox (pruebas)</span>

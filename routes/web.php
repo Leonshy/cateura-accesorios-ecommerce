@@ -15,8 +15,10 @@ use App\Http\Controllers\Admin\BannerAdminController;
 use App\Http\Controllers\Admin\CategoryAdminController;
 use App\Http\Controllers\Admin\SubcategoryAdminController;
 use App\Http\Controllers\Admin\ContactAdminController;
+use App\Http\Controllers\Admin\ContentAdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LegalAdminController;
+use App\Http\Controllers\Admin\ManualAdminController;
 use App\Http\Controllers\Admin\MediaAdminController;
 use App\Http\Controllers\Admin\NewsletterAdminController;
 use App\Http\Controllers\Admin\OrderAdminController;
@@ -27,6 +29,46 @@ use App\Http\Controllers\Admin\UserAdminController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Rutas públicas ──────────────────────────────────────────────────────────
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', function () {
+    return response("User-agent: *\nDisallow:\n\nSitemap: " . route('sitemap') . "\n")
+        ->header('Content-Type', 'text/plain');
+})->name('robots');
+
+Route::get('/llms.txt', function () {
+    $categories = \App\Models\Category::active()->orderBy('order')->get();
+
+    $lines = [
+        '# Cateura Accesorios',
+        '',
+        '> Tienda en línea de accesorios, piezas decorativas y prendas artesanales hechas con materiales reciclados por mujeres artesanas del Bañado Sur, Asunción, Paraguay. Cada compra apoya directamente a la Asociación Mujeres Unidas del Bañado Sur.',
+        '',
+        '## Páginas principales',
+        '- [Tienda](' . route('shop.index') . '): catálogo completo de productos disponibles.',
+        '- [Artesanas](' . route('artisans.index') . '): historias de las mujeres que elaboran cada pieza.',
+        '- [Noticias](' . route('posts.index') . '): novedades y eventos de la asociación.',
+        '- [Nosotros](' . route('about') . '): la historia y misión del proyecto.',
+        '- [Contacto](' . route('contact') . '): medios de contacto y ubicación.',
+    ];
+
+    if ($categories->isNotEmpty()) {
+        $lines[] = '';
+        $lines[] = '## Categorías de productos';
+        foreach ($categories as $category) {
+            $lines[] = '- [' . $category->name . '](' . route('shop.index', ['categoria' => $category->slug]) . ')';
+        }
+    }
+
+    $lines[] = '';
+    $lines[] = '## Datos estructurados';
+    $lines[] = 'Cada página de producto incluye datos estructurados Schema.org (JSON-LD, tipo Product) con precio, disponibilidad y valoraciones. El sitio completo incluye datos Schema.org de tipo Organization.';
+    $lines[] = '';
+    $lines[] = '## Mapa del sitio';
+    $lines[] = route('sitemap');
+
+    return response(implode("\n", $lines) . "\n")->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('llms-txt');
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('tienda')->group(function () {
@@ -48,15 +90,22 @@ Route::get('/nosotros', fn() => view('pages.about', [
     'aboutValues' => \App\Models\AboutValue::active()->orderBy('order')->get(),
 ]))->name('about');
 Route::get('/contacto', [ContactController::class, 'index'])->name('contact');
-Route::post('/contacto', [ContactController::class, 'store'])->name('contact.store');
-Route::post('/newsletter', [ContactController::class, 'newsletter'])->name('newsletter.subscribe');
+Route::post('/contacto', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.store');
+Route::post('/newsletter', [ContactController::class, 'newsletter'])->middleware('throttle:5,1')->name('newsletter.subscribe');
+Route::get('/newsletter/confirmar/{token}', [ContactController::class, 'confirmNewsletter'])->name('newsletter.confirm');
 
 // Legal pages
-Route::get('/politica-de-privacidad', fn() => view('pages.legal', ['key' => 'privacidad']))->name('legal.privacidad');
-Route::get('/terminos-y-condiciones', fn() => view('pages.legal', ['key' => 'terminos']))->name('legal.terminos');
-Route::get('/politicas-de-compra', fn() => view('pages.legal', ['key' => 'compra']))->name('legal.compra');
-Route::get('/politicas-de-envio', fn() => view('pages.legal', ['key' => 'envio']))->name('legal.envio');
-Route::get('/cambios-y-devoluciones', fn() => view('pages.legal', ['key' => 'devoluciones']))->name('legal.devoluciones');
+$legalPageView = function (string $key) {
+    $legalPage = \App\Models\LegalPage::where('key', $key)->first();
+    // Una página desactivada por el equipo administrativo no debe quedar accesible por URL directa.
+    abort_if($legalPage && !$legalPage->is_active, 404);
+    return view('pages.legal', ['key' => $key, 'legalPage' => $legalPage]);
+};
+Route::get('/politica-de-privacidad', fn() => $legalPageView('privacidad'))->name('legal.privacidad');
+Route::get('/terminos-y-condiciones', fn() => $legalPageView('terminos'))->name('legal.terminos');
+Route::get('/politicas-de-compra', fn() => $legalPageView('compra'))->name('legal.compra');
+Route::get('/politicas-de-envio', fn() => $legalPageView('envio'))->name('legal.envio');
+Route::get('/cambios-y-devoluciones', fn() => $legalPageView('devoluciones'))->name('legal.devoluciones');
 
 // ─── Carrito ─────────────────────────────────────────────────────────────────
 Route::prefix('carrito')->name('cart.')->group(function () {
@@ -79,7 +128,7 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
 });
 
 // ─── Mi cuenta (clientes autenticados) ───────────────────────────────────────
-Route::prefix('mi-cuenta')->name('account.')->middleware('auth')->group(function () {
+Route::prefix('mi-cuenta')->name('account.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [AccountController::class, 'index'])->name('index');
     Route::get('/pedidos', [AccountController::class, 'orders'])->name('orders');
     Route::get('/pedidos/{orderNumber}', [AccountController::class, 'orderShow'])->name('orders.show');
@@ -91,79 +140,108 @@ Route::prefix('mi-cuenta')->name('account.')->middleware('auth')->group(function
 });
 
 // ─── Panel Administrativo ────────────────────────────────────────────────────
+// Cada sección lleva además el rol que puede usarla (el middleware `role` deja
+// pasar siempre a un Admin). Ver resources/docs/manual-usuario.md para la
+// matriz de roles documentada: Editor = catálogo/contenido, Vendedor = ventas,
+// Admin = todo lo demás (usuarios, textos, configuración, pagos, envíos).
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
 
-    // Multimedia
-    Route::prefix('multimedia')->name('media.')->group(function () {
-        Route::get('/', [MediaAdminController::class, 'index'])->name('index');
-        Route::post('/upload', [MediaAdminController::class, 'upload'])->name('upload');
-        Route::get('/picker', [MediaAdminController::class, 'picker'])->name('picker');
-        Route::patch('/{media}/alt', [MediaAdminController::class, 'updateAlt'])->name('alt');
-        Route::delete('/{media}', [MediaAdminController::class, 'destroy'])->name('destroy');
+    // Manual de uso — disponible para cualquier rol administrativo.
+    Route::prefix('manual')->name('manual.')->group(function () {
+        Route::get('/', [ManualAdminController::class, 'index'])->name('index');
+        Route::get('/imprimir', [ManualAdminController::class, 'print'])->name('print');
+        Route::get('/descargar.md', [ManualAdminController::class, 'downloadMarkdown'])->name('download-md');
     });
 
-    // Productos
-    Route::resource('products', ProductAdminController::class)->names('products');
+    // ── Catálogo y contenido (Editor + Admin) ──────────────────────────────
+    Route::middleware('role:editor')->group(function () {
+        // Multimedia
+        Route::prefix('multimedia')->name('media.')->group(function () {
+            Route::get('/', [MediaAdminController::class, 'index'])->name('index');
+            Route::post('/upload', [MediaAdminController::class, 'upload'])->name('upload');
+            Route::get('/picker', [MediaAdminController::class, 'picker'])->name('picker');
+            Route::patch('/{media}/alt', [MediaAdminController::class, 'updateAlt'])->name('alt');
+            Route::delete('/{media}', [MediaAdminController::class, 'destroy'])->name('destroy');
+        });
 
-    // Categorías
-    Route::resource('categories', CategoryAdminController::class)->names('categories');
+        // Productos
+        Route::resource('products', ProductAdminController::class)->names('products');
 
-    // Subcategorías
-    Route::post('categories/{category}/subcategories', [SubcategoryAdminController::class, 'store'])->name('subcategories.store');
-    Route::patch('subcategories/{subcategory}', [SubcategoryAdminController::class, 'update'])->name('subcategories.update');
-    Route::delete('subcategories/{subcategory}', [SubcategoryAdminController::class, 'destroy'])->name('subcategories.destroy');
+        // Categorías
+        Route::resource('categories', CategoryAdminController::class)->names('categories');
 
-    // Artesanas
-    Route::resource('artisans', ArtisanAdminController::class)->names('artisans');
+        // Subcategorías
+        Route::post('categories/{category}/subcategories', [SubcategoryAdminController::class, 'store'])->name('subcategories.store');
+        Route::patch('subcategories/{subcategory}', [SubcategoryAdminController::class, 'update'])->name('subcategories.update');
+        Route::delete('subcategories/{subcategory}', [SubcategoryAdminController::class, 'destroy'])->name('subcategories.destroy');
+        Route::post('subcategories/{subcategory}/subir', [SubcategoryAdminController::class, 'moveUp'])->name('subcategories.move-up');
+        Route::post('subcategories/{subcategory}/bajar', [SubcategoryAdminController::class, 'moveDown'])->name('subcategories.move-down');
 
-    // Noticias/eventos
-    Route::resource('posts', PostAdminController::class)->names('posts');
+        // Artesanas
+        Route::resource('artisans', ArtisanAdminController::class)->names('artisans');
 
-    // Banners
-    Route::resource('banners', BannerAdminController::class)->names('banners');
+        // Noticias/eventos
+        Route::resource('posts', PostAdminController::class)->names('posts');
 
-    // Pedidos
-    Route::get('/orders', [OrderAdminController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [OrderAdminController::class, 'show'])->name('orders.show');
-    Route::patch('/orders/{order}/status', [OrderAdminController::class, 'updateStatus'])->name('orders.status');
+        // Banners
+        Route::resource('banners', BannerAdminController::class)->names('banners');
+    });
 
-    // Contacto
-    Route::get('/contactos', [ContactAdminController::class, 'index'])->name('contacts.index');
-    Route::get('/contactos/{message}', [ContactAdminController::class, 'show'])->name('contacts.show');
-    Route::delete('/contactos/{message}', [ContactAdminController::class, 'destroy'])->name('contacts.destroy');
+    // ── Ventas (Vendedor + Admin) ──────────────────────────────────────────
+    Route::middleware('role:vendedor')->group(function () {
+        // Pedidos
+        Route::get('/orders', [OrderAdminController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [OrderAdminController::class, 'show'])->name('orders.show');
+        Route::patch('/orders/{order}/status', [OrderAdminController::class, 'updateStatus'])->name('orders.status');
 
-    // Newsletter
-    Route::get('/newsletter', [NewsletterAdminController::class, 'index'])->name('newsletter.index');
+        // Contacto
+        Route::get('/contactos', [ContactAdminController::class, 'index'])->name('contacts.index');
+        Route::get('/contactos/{message}', [ContactAdminController::class, 'show'])->name('contacts.show');
+        Route::delete('/contactos/{message}', [ContactAdminController::class, 'destroy'])->name('contacts.destroy');
 
-    // Usuarios
-    Route::get('/usuarios', [UserAdminController::class, 'index'])->name('users.index');
-    Route::get('/usuarios/{user}/edit', [UserAdminController::class, 'edit'])->name('users.edit');
-    Route::patch('/usuarios/{user}', [UserAdminController::class, 'update'])->name('users.update');
+        // Newsletter
+        Route::get('/newsletter', [NewsletterAdminController::class, 'index'])->name('newsletter.index');
+    });
 
-    // Legal
-    Route::get('/legal', [LegalAdminController::class, 'index'])->name('legal.index');
-    Route::get('/legal/{key}/edit', [LegalAdminController::class, 'edit'])->name('legal.edit');
-    Route::patch('/legal/{key}', [LegalAdminController::class, 'update'])->name('legal.update');
+    // ── Solo Admin ──────────────────────────────────────────────────────────
+    Route::middleware('role:admin')->group(function () {
+        // Usuarios
+        Route::get('/usuarios', [UserAdminController::class, 'index'])->name('users.index');
+        Route::get('/usuarios/{user}/edit', [UserAdminController::class, 'edit'])->name('users.edit');
+        Route::patch('/usuarios/{user}', [UserAdminController::class, 'update'])->name('users.update');
+        Route::post('/usuarios/{user}/restablecer-contrasena', [UserAdminController::class, 'sendPasswordReset'])->name('users.send-password-reset');
 
-    // Contenido de páginas
-    Route::get('/contenido', [SettingsAdminController::class, 'content'])->name('settings.content');
-    Route::post('/contenido', [SettingsAdminController::class, 'updateContent'])->name('settings.content.update');
+        // Legal
+        Route::get('/legal', [LegalAdminController::class, 'index'])->name('legal.index');
+        Route::get('/legal/{key}/edit', [LegalAdminController::class, 'edit'])->name('legal.edit');
+        Route::patch('/legal/{key}', [LegalAdminController::class, 'update'])->name('legal.update');
 
-    // Valores (página Nosotros)
-    Route::post('valores', [AboutValueAdminController::class, 'store'])->name('about-values.store');
-    Route::patch('valores/{aboutValue}', [AboutValueAdminController::class, 'update'])->name('about-values.update');
-    Route::delete('valores/{aboutValue}', [AboutValueAdminController::class, 'destroy'])->name('about-values.destroy');
+        // Contenido de páginas públicas (cada página pública tiene su propia pantalla)
+        Route::prefix('contenido')->name('content.')->group(function () {
+            Route::get('/inicio', [ContentAdminController::class, 'home'])->name('home');
+            Route::post('/inicio', [ContentAdminController::class, 'updateHome'])->name('home.update');
+            Route::get('/artesanas', [ContentAdminController::class, 'artisans'])->name('artisans');
+            Route::post('/artesanas', [ContentAdminController::class, 'updateArtisans'])->name('artisans.update');
+            Route::get('/nosotros', [ContentAdminController::class, 'about'])->name('about');
+            Route::post('/nosotros', [ContentAdminController::class, 'updateAbout'])->name('about.update');
+        });
 
-    // Configuración
-    Route::get('/configuracion', [SettingsAdminController::class, 'general'])->name('settings.general');
-    Route::post('/configuracion', [SettingsAdminController::class, 'updateGeneral'])->name('settings.update');
-    Route::get('/integraciones', [SettingsAdminController::class, 'integrations'])->name('settings.integrations');
-    Route::patch('/metodo-pago/{paymentMethod}', [SettingsAdminController::class, 'updatePaymentMethod'])->name('settings.payment');
-    Route::get('/envios', [SettingsAdminController::class, 'shipping'])->name('settings.shipping');
-    Route::post('/envios', [SettingsAdminController::class, 'updateShipping'])->name('settings.shipping.update');
+        // Valores (página Nosotros)
+        Route::post('valores', [AboutValueAdminController::class, 'store'])->name('about-values.store');
+        Route::patch('valores/{aboutValue}', [AboutValueAdminController::class, 'update'])->name('about-values.update');
+        Route::delete('valores/{aboutValue}', [AboutValueAdminController::class, 'destroy'])->name('about-values.destroy');
+
+        // Configuración
+        Route::get('/configuracion', [SettingsAdminController::class, 'general'])->name('settings.general');
+        Route::post('/configuracion', [SettingsAdminController::class, 'updateGeneral'])->name('settings.update');
+        Route::get('/integraciones', [SettingsAdminController::class, 'integrations'])->name('settings.integrations');
+        Route::patch('/metodo-pago/{paymentMethod}', [SettingsAdminController::class, 'updatePaymentMethod'])->name('settings.payment');
+        Route::get('/envios', [SettingsAdminController::class, 'shipping'])->name('settings.shipping');
+        Route::post('/envios', [SettingsAdminController::class, 'updateShipping'])->name('settings.shipping.update');
+    });
 });
 
 require __DIR__.'/auth.php';

@@ -70,7 +70,7 @@
                             <div class="relative aspect-square bg-stone-50 border-2 overflow-hidden cursor-pointer transition-all group"
                                  :class="selectedUrls.includes(file.file_url) ? 'border-copper-500 ring-2 ring-copper-300' : 'border-stone-200 hover:border-copper-300'"
                                  @click="toggleSelect(file)">
-                                <img x-show="file.is_image" :src="file.file_url" :alt="file.alt_text ?? ''" class="w-full h-full object-cover">
+                                <img x-show="file.is_image" :src="file.thumb_url || file.file_url" :alt="file.alt_text ?? ''" class="w-full h-full object-cover">
                                 <div x-show="!file.is_image" class="w-full h-full flex items-center justify-center text-stone-400 text-xs p-2 text-center font-bold uppercase" x-text="file.file_name.split('.').pop()"></div>
                                 <div x-show="selectedUrls.includes(file.file_url)" class="absolute inset-0 bg-copper-600/20 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-copper-600 bg-white rounded-full p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>

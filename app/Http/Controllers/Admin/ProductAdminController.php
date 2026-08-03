@@ -28,7 +28,7 @@ class ProductAdminController extends Controller
 
     public function create()
     {
-        $categories = Category::active()->with('subcategories')->orderBy('order')->get();
+        $categories = Category::active()->with(['subcategories' => fn ($q) => $q->ordered()])->orderBy('order')->get();
         return view('admin.products.create', compact('categories'));
     }
 
@@ -77,7 +77,7 @@ class ProductAdminController extends Controller
     public function edit(Product $product)
     {
         $product->load('colors', 'images');
-        $categories = Category::active()->with('subcategories')->orderBy('order')->get();
+        $categories = Category::active()->with(['subcategories' => fn ($q) => $q->ordered()])->orderBy('order')->get();
         return view('admin.products.edit', compact('product', 'categories'));
     }
 

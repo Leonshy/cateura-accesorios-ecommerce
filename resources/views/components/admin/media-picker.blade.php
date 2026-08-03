@@ -14,7 +14,7 @@
 <div x-data="mediaPicker_{{ $pickerId }}()" x-init="init()">
     <label class="block text-xs font-medium text-stone-600 mb-1">{{ $label }}</label>
 
-    <div class="flex items-start gap-3">
+    <div class="flex flex-wrap items-start gap-3">
         <div class="flex-shrink-0">
             <div x-show="currentUrl" class="w-20 h-20 border border-stone-200 overflow-hidden bg-stone-50 flex items-center justify-center">
                 <img x-show="currentUrl" :src="currentUrl" alt="" class="w-full h-full object-cover">
@@ -25,7 +25,7 @@
         </div>
         <div class="flex flex-col gap-2 flex-1 min-w-0">
             <input type="hidden" name="{{ $name }}" :value="currentUrl">
-            <div class="flex gap-2 flex-wrap">
+            <div class="flex flex-col items-start gap-2">
                 <button type="button" @click="openModal()" class="text-xs bg-stone-800 text-white px-3 py-1.5 hover:bg-stone-700 transition-colors uppercase tracking-wide">
                     Seleccionar / Subir
                 </button>
@@ -75,7 +75,7 @@
                             <div class="relative aspect-square bg-stone-50 border-2 overflow-hidden cursor-pointer transition-all group"
                                  :class="selectedId === file.id ? 'border-copper-500 ring-2 ring-copper-300' : 'border-stone-200 hover:border-copper-300'"
                                  @click="selectFile(file)">
-                                <img x-show="file.is_image" :src="file.file_url" :alt="file.alt_text ?? ''" class="w-full h-full object-cover">
+                                <img x-show="file.is_image" :src="file.thumb_url || file.file_url" :alt="file.alt_text ?? ''" class="w-full h-full object-cover">
                                 <div x-show="!file.is_image" class="w-full h-full flex items-center justify-center text-stone-400 text-xs p-2 text-center font-bold uppercase" x-text="file.file_name.split('.').pop()"></div>
                                 <div x-show="selectedId === file.id" class="absolute inset-0 bg-copper-600/20 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-copper-600 bg-white rounded-full p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>

@@ -18,7 +18,13 @@
             @forelse($subscribers as $sub)
             <tr class="hover:bg-stone-50">
                 <td class="px-4 py-3 text-stone-700">{{ $sub->email }}</td>
-                <td class="px-4 py-3 text-center"><span class="text-xs {{ $sub->is_active ? 'bg-green-100 text-green-600' : 'bg-stone-100 text-stone-500' }} px-2 py-0.5">{{ $sub->is_active ? 'Activo' : 'Cancelado' }}</span></td>
+                <td class="px-4 py-3 text-center">
+                    @if($sub->isConfirmed())
+                    <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5">Confirmado</span>
+                    @else
+                    <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5" title="Se elimina automáticamente si no confirma dentro de 72hs">Pendiente de confirmación</span>
+                    @endif
+                </td>
                 <td class="px-4 py-3 text-right text-xs text-stone-400">{{ $sub->created_at->format('d/m/Y') }}</td>
             </tr>
             @empty

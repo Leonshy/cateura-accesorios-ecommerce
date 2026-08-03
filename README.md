@@ -108,6 +108,7 @@ DB_USERNAME=db_user
 DB_PASSWORD=db_password
 
 SESSION_DRIVER=file
+SESSION_SECURE_COOKIE=true   # HTTPS obligatorio en producción
 CACHE_STORE=file
 QUEUE_CONNECTION=sync
 
@@ -153,7 +154,18 @@ chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 ```
 
-### 5. Configuración Nginx (Plesk → nginx)
+### 5. Tareas programadas (cron)
+
+El proyecto tiene 2 tareas programadas (`routes/console.php`) que necesitan el scheduler de Laravel corriendo en el servidor:
+- Purga de suscriptores de newsletter sin confirmar en 72hs (cada hora).
+- Borrado de carritos de invitado abandonados por más de 5 días (diario).
+
+Agregar en el cron del servidor (Plesk → Tareas programadas):
+```bash
+* * * * * cd /var/www/vhosts/tu-dominio.com.py/httpdocs && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### 6. Configuración Nginx (Plesk → nginx)
 
 En "Directivas adicionales de nginx":
 ```nginx
@@ -197,27 +209,30 @@ php artisan up
 
 ```
 app/
-  Http/Controllers/        # Controladores públicos (shop, artisans, posts, checkout...)
+  Http/Controllers/        # Controladores públicos (shop, artisans, posts, checkout, sitemap...)
   Http/Controllers/Admin/  # CRUD completo del panel admin (incluye MediaAdminController)
   Models/                  # Product, Category, Order, Artisan, Post, Banner, MediaFile, etc.
   Http/Middleware/          # RoleMiddleware, AdminAccessMiddleware
   Services/                # BancardService, PagoparService (integración real de pasarelas de pago)
-  helpers.php              # media_url() — resuelve URLs de biblioteca multimedia y paths legado
+  Console/Commands/        # Jobs programados: purga de newsletter sin confirmar, carritos abandonados
+  helpers.php              # media_url(), catalog_thumb_url() — resuelven URLs de biblioteca multimedia y paths legado
 database/
   migrations/              # Todas las tablas del sistema
   seeders/                 # Datos iniciales (productos, usuarios, configuración)
 resources/
+  docs/manual-usuario.md   # Manual de uso completo (se sirve desde /admin/manual — ver panel admin)
   views/
     layouts/               # app.blade.php, admin.blade.php, guest.blade.php
+    errors/                # 404.blade.php, 403.blade.php, 500.blade.php — páginas de error con la marca del sitio
     components/admin/      # media-picker.blade.php, media-picker-multi.blade.php
     home.blade.php
-    shop/                  # index.blade.php, product.blade.php
+    shop/                  # index.blade.php, product.blade.php (incluye datos estructurados Schema.org)
     checkout/              # Flujo de compra (index, confirmation)
     artisans/              # index.blade.php, show.blade.php
     posts/                 # Noticias/blog
     pages/                 # about.blade.php, contact.blade.php, legal.blade.php
     account/               # Pedidos, wishlist, perfil, direcciones
-    admin/                 # Dashboard y CRUD completo (incluye admin/media/index.blade.php)
+    admin/                 # Dashboard y CRUD completo (incluye admin/media/index.blade.php, admin/manual/)
 public/
   assets/brand/            # logo-horizontal.png, logo-vertical.png, logo-mark.png (fallback si no hay logo cargado en admin)
   assets/institucional/    # Fotos por defecto de la sección institucional de la home
@@ -228,9 +243,9 @@ storage/app/public/
   artisans/                # Fotos de artesanas (legado)
   posts/                   # Imágenes de noticias (legado)
   banners/                 # Banners del hero (legado)
-  media/                   # Biblioteca multimedia — todo archivo nuevo subido vía /admin/multimedia
+  media/                   # Biblioteca multimedia — todo archivo nuevo subido vía /admin/multimedia (incluye miniaturas `-thumb.*` autogeneradas)
 tests/
-  Feature/CheckoutPaymentGatewaysTest.php  # Tests del checkout con las 3 pasarelas de pago
+  Feature/                 # ~210 tests — checkout (3 pasarelas), auth, sanitización XSS/SVG, sitemap, datos estructurados, etc.
 ```
 
 ---
@@ -242,6 +257,7 @@ Accedé en `/admin` con usuario rol `admin`, `editor` o `vendedor`. Al iniciar s
 | Sección | Ruta |
 |---------|------|
 | Dashboard | /admin |
+| Manual de uso (ver/descargar) | /admin/manual |
 | Productos | /admin/products |
 | Categorías | /admin/categories |
 | Pedidos | /admin/orders |
@@ -249,13 +265,13 @@ Accedé en `/admin` con usuario rol `admin`, `editor` o `vendedor`. Al iniciar s
 | Noticias | /admin/posts |
 | Banners hero | /admin/banners |
 | Multimedia | /admin/multimedia |
-| Página de inicio / Nosotros (contenido editable) | /admin/contenido |
+| Textos del sitio (Inicio / Artesanas / Nosotros) | /admin/contenido |
 | Mensajes | /admin/contacts |
-| Newsletter | /admin/newsletter |
-| Usuarios | /admin/users |
-| Páginas legales | /admin/legal |
-| Configuración general (nombre, logo, favicon, contacto, redes) | /admin/configuracion |
-| Integraciones (pagos/captcha/analytics) | /admin/integraciones |
+| Newsletter (incluye estado de confirmación de cada suscriptor) | /admin/newsletter |
+| Usuarios (incluye envío de reset de contraseña por un admin) | /admin/users |
+| Páginas legales (privacidad/términos siempre visibles, el resto se puede ocultar) | /admin/legal |
+| Configuración general (nombre, logo, favicon, contacto, redes, hCaptcha por formulario) | /admin/configuracion |
+| Integraciones (pagos, datos bancarios, captcha, analytics) | /admin/integraciones |
 | Envíos (zonas por departamento/ciudad, retiro en tienda, AEX) | /admin/envios |
 
 ### Biblioteca multimedia
@@ -276,11 +292,25 @@ Las subcategorías se gestionan dentro de la pantalla de edición de cada catego
 
 Configurables desde `/admin/integraciones`:
 
-- **Transferencia bancaria** — manual. El cliente sube un comprobante (PDF, JPG o PNG, máx. 5MB) al finalizar la compra; el pedido queda en estado "pendiente de verificación" hasta que un admin lo revisa y aprueba desde `/admin/orders/{id}` (el comprobante aparece como link "Ver comprobante de transferencia").
+- **Transferencia bancaria** — manual. Los datos de la cuenta (banco, número, titular) se cargan en `/admin/integraciones` y se muestran al cliente en el checkout apenas elige este método. El cliente sube un comprobante (PDF, JPG o PNG, máx. 5MB) al finalizar la compra; el pedido queda en estado "pendiente de verificación" hasta que un admin lo revisa y aprueba desde `/admin/orders/{id}` (el comprobante aparece como link "Ver comprobante de transferencia").
 - **Pagopar** — integración real con la API de Pagopar (tarjetas, Tigo Money, billeteras). Requiere cargar `public_key` y `private_key` reales.
 - **Bancard** — integración real con la API VPOS de Bancard (tarjetas de crédito/débito). Requiere cargar `public_key` y `private_key` reales.
 
 Al activar Pagopar o Bancard, la pantalla de integraciones muestra las URLs de webhook que hay que configurar en el panel de cada pasarela.
+
+> **Carrito vs. pago:** para Pagopar y Bancard, el carrito del cliente recién se vacía cuando el webhook de la pasarela confirma el pago como aprobado (`Order.cart_id`) — no al redirigir a la pasarela. Si el pago es rechazado o el cliente lo abandona, el carrito queda intacto para reintentar. Para transferencia bancaria (sin redirección externa) se vacía de inmediato al confirmar el pedido.
+
+### hCaptcha
+
+Configurable por formulario desde `/admin/configuracion`: con las claves cargadas, se puede activar/desactivar independientemente para el formulario de **contacto**, **newsletter** y **registro de cuenta** (`hcaptcha_enabled_contact` / `_newsletter` / `_register` en `site_settings`).
+
+### SEO y descubrimiento por asistentes de IA
+
+Generados dinámicamente, sin pantalla de configuración:
+- `/sitemap.xml` — productos activos, categorías, artesanas, noticias publicadas y páginas legales visibles (`SitemapController`).
+- `/robots.txt` — permite crawlers de buscadores y de IA (GPTBot, ClaudeBot, etc.), referencia el sitemap.
+- `/llms.txt` — resumen del sitio en texto plano para asistentes de IA.
+- Datos estructurados Schema.org (JSON-LD): `Product` en cada ficha de producto (precio, stock, `aggregateRating`), `Organization` en todo el sitio (layout principal).
 
 ### Envíos
 
@@ -301,7 +331,13 @@ En el checkout, el cliente elige departamento y ciudad; el costo se cotiza en ti
 php artisan test
 ```
 
-`tests/Feature/CheckoutPaymentGatewaysTest.php` cubre los 3 métodos de pago del checkout (transferencia, Bancard, Pagopar) simulando las respuestas de las pasarelas externas con `Http::fake()`.
+~210 tests en `tests/Feature/`, entre otros:
+- `CheckoutPaymentGatewaysTest.php` — los 3 métodos de pago (transferencia, Bancard, Pagopar), simulando las pasarelas con `Http::fake()`, incluyendo que el carrito no se vacíe hasta confirmar el pago.
+- `SvgUploadSanitizationTest.php`, XSS y sanitización de HTML en contenido editable por el admin.
+- `MediaThumbnailTest.php` — generación de miniaturas de imágenes.
+- `SitemapTest.php`, `StructuredDataTest.php`, `LlmsTxtTest.php` — SEO y datos estructurados.
+- `PruneAbandonedGuestCartsTest.php`, `OrdersTableIndexTest.php` — mantenimiento y rendimiento de BD.
+- `CustomErrorPagesTest.php` — páginas 404/403/500 personalizadas.
 
 ---
 

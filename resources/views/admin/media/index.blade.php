@@ -48,7 +48,7 @@
         <div class="border border-stone-100 bg-white group relative">
             <div class="aspect-square bg-stone-50 overflow-hidden flex items-center justify-center">
                 @if(str_starts_with($file->mime_type ?? '', 'image/'))
-                <img src="{{ $file->file_url }}" alt="{{ $file->alt_text }}" class="w-full h-full object-cover">
+                <img src="{{ $file->thumb_url }}" alt="{{ $file->alt_text }}" class="w-full h-full object-cover">
                 @else
                 <span class="text-xs uppercase text-stone-400 font-medium">{{ pathinfo($file->file_name, PATHINFO_EXTENSION) }}</span>
                 @endif

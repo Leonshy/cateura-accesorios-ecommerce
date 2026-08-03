@@ -36,7 +36,7 @@ class ShopController extends Controller
         }, fn($q) => $q->latest());
 
         $products = $query->paginate(24)->withQueryString();
-        $categories = Category::active()->with('subcategories')->orderBy('order')->get();
+        $categories = Category::active()->with(['subcategories' => fn ($q) => $q->active()->ordered()])->orderBy('order')->get();
         $currentCategory = $request->filled('categoria')
             ? Category::where('slug', $request->categoria)->first()
             : null;

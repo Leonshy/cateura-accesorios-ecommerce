@@ -17,6 +17,18 @@
             <textarea name="content" rows="20" class="input-cateura border p-2 w-full font-mono text-xs">{{ old('content', $legalPage->content ?? '') }}</textarea>
         </div>
     </div>
+
+    <div class="bg-white border border-stone-100 shadow-sm p-6">
+        @if(in_array($key, \App\Models\LegalPage::ALWAYS_VISIBLE_KEYS, true))
+        <p class="text-sm text-stone-500">Esta página es de aceptación obligatoria en el checkout, así que siempre queda visible en el sitio y no se puede desactivar.</p>
+        @else
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="is_active" value="1" {{ old('is_active', $legalPage->is_active ?? true) ? 'checked' : '' }} class="text-copper-500">
+            <span class="text-sm text-stone-600">Página visible en el sitio</span>
+        </label>
+        <p class="text-xs text-stone-400 mt-1">Si la desactivás, el enlace desaparece del sitio y la página deja de ser accesible.</p>
+        @endif
+    </div>
     <div class="flex gap-3">
         <button type="submit" class="btn-copper">Guardar</button>
         <a href="{{ route('admin.legal.index') }}" class="btn-stone">Volver</a>

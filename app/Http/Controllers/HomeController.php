@@ -13,7 +13,7 @@ class HomeController extends Controller
     public function index()
     {
         $banners = Banner::active()->where('position', 'home_hero')->orderBy('order')->get();
-        $categories = Category::active()->orderBy('order')->get();
+        $categories = Category::activeOrderedCached();
         $featuredProducts = Product::active()->featured()->with('category')->inStock()->latest()->take(8)->get();
         $newProducts = Product::active()->new()->with('category')->inStock()->latest()->take(8)->get();
         $featuredArtisans = Artisan::active()->orderBy('order')->take(3)->get();

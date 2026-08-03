@@ -8,7 +8,7 @@
 
     {{-- Image --}}
     <a href="{{ route('shop.product', $product->slug) }}" class="block overflow-hidden bg-stone-100 aspect-[3/4] relative">
-        <img src="{{ $product->main_image }}" alt="{{ $product->name }}"
+        <img src="{{ $product->catalog_image }}" alt="{{ $product->name }}"
              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
         {{-- Hover actions --}}
         <div class="absolute bottom-0 left-0 right-0 bg-white/95 py-3 px-3 flex gap-2 translate-y-full group-hover:translate-y-0 transition-transform duration-300">

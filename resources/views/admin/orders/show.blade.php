@@ -7,18 +7,24 @@
             <p class="text-xs text-stone-400">{{ $order->created_at->format('d/m/Y H:i') }}</p>
             <h2 class="font-mono font-bold text-2xl text-stone-700">{{ $order->order_number }}</h2>
         </div>
-        <form action="{{ route('admin.orders.status', $order) }}" method="POST" class="flex items-center gap-3">
+        <form action="{{ route('admin.orders.status', $order) }}" method="POST" class="flex items-end gap-3">
             @csrf @method('PATCH')
-            <select name="status" class="border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:border-copper-500">
-                @foreach(['pendiente','confirmado','preparando','enviado','entregado','cancelado'] as $s)
-                <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
-                @endforeach
-            </select>
-            <select name="payment_status" class="border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:border-copper-500">
-                @foreach(['pendiente','pagado','rechazado','pendiente_confirmacion'] as $p)
-                <option value="{{ $p }}" {{ $order->payment_status === $p ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $p)) }}</option>
-                @endforeach
-            </select>
+            <div>
+                <label for="order-status" class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Estado del pedido</label>
+                <select id="order-status" name="status" class="border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:border-copper-500">
+                    @foreach(['pendiente','confirmado','preparando','enviado','entregado','cancelado'] as $s)
+                    <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="order-payment-status" class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Estado del pago</label>
+                <select id="order-payment-status" name="payment_status" class="border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:border-copper-500">
+                    @foreach(['pendiente','pagado','rechazado','pendiente_confirmacion'] as $p)
+                    <option value="{{ $p }}" {{ $order->payment_status === $p ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $p)) }}</option>
+                    @endforeach
+                </select>
+            </div>
             <button type="submit" class="btn-copper py-2 px-4 text-xs">Actualizar</button>
         </form>
     </div>

@@ -13,6 +13,7 @@ class ProductController extends Controller
             ->firstOrFail();
 
         $related = Product::active()->inStock()
+            ->with('category')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->take(4)->get();

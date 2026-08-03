@@ -2,14 +2,21 @@
 namespace App\Http\Controllers;
 
 use App\Data\ParaguayLocations;
+use App\Exceptions\InsufficientStockException;
+use App\Mail\OrderConfirmed;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentMethod;
+use App\Models\Product;
 use App\Models\ShippingSetting;
 use App\Services\BancardService;
 use App\Services\PagoparService;
+use App\Services\StockService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
@@ -111,47 +118,68 @@ class CheckoutController extends Controller
             $transferReceiptPath = $request->file('transfer_receipt')->store('receipts', 'public');
         }
 
-        $order = Order::create([
-            'order_number'        => Order::generateNumber(),
-            'user_id'             => auth()->id(),
-            'guest_token'         => auth()->check() ? null : Str::random(64),
-            'customer_name'       => $request->customer_name,
-            'customer_email'      => $request->customer_email,
-            'customer_phone'      => $request->customer_phone,
-            'address_line1'       => $request->address_line1,
-            'address_city'        => $request->address_city,
-            'address_department'  => $request->address_department,
-            'address_notes'       => $request->address_notes,
-            'billing_ruc'         => $request->billing_ruc,
-            'billing_name'        => $request->billing_name,
-            'payment_method'      => $request->payment_method,
-            'payment_status'      => 'pendiente',
-            'transfer_receipt'    => $transferReceiptPath,
-            'shipping_method'     => $shippingMethodLabel,
-            'shipping_cost'       => $shippingCost,
-            'subtotal'            => $subtotal,
-            'total'               => $total,
-            'status'              => 'pendiente',
-        ]);
+        try {
+            $order = DB::transaction(function () use ($request, $cart, $subtotal, $shippingMethodLabel, $shippingCost, $total, $transferReceiptPath) {
+                // Bloquear cada producto y revalidar stock recién acá, dentro de la
+                // transacción: si dos compras del último ítem llegan al mismo tiempo,
+                // la segunda encuentra el stock ya descontado por la primera y falla
+                // en vez de vender de más.
+                foreach ($cart->items as $item) {
+                    $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
+                    if (!$product || $product->stock < $item->quantity) {
+                        throw new InsufficientStockException($item->product->name ?? 'producto');
+                    }
+                }
 
-        foreach ($cart->items as $item) {
-            OrderItem::create([
-                'order_id'      => $order->id,
-                'product_id'    => $item->product_id,
-                'product_name'  => $item->product->name,
-                'product_image' => $item->product->image,
-                'color'         => $item->color,
-                'quantity'      => $item->quantity,
-                'unit_price'    => $item->unit_price,
-                'subtotal'      => $item->subtotal,
-            ]);
+                $order = Order::create([
+                    'order_number'        => Order::generateNumber(),
+                    'user_id'             => auth()->id(),
+                    'cart_id'             => $cart->id,
+                    'guest_token'         => auth()->check() ? null : Str::random(64),
+                    'customer_name'       => $request->customer_name,
+                    'customer_email'      => $request->customer_email,
+                    'customer_phone'      => $request->customer_phone,
+                    'address_line1'       => $request->address_line1,
+                    'address_city'        => $request->address_city,
+                    'address_department'  => $request->address_department,
+                    'address_notes'       => $request->address_notes,
+                    'billing_ruc'         => $request->billing_ruc,
+                    'billing_name'        => $request->billing_name,
+                    'payment_method'      => $request->payment_method,
+                    'payment_status'      => 'pendiente',
+                    'transfer_receipt'    => $transferReceiptPath,
+                    'shipping_method'     => $shippingMethodLabel,
+                    'shipping_cost'       => $shippingCost,
+                    'subtotal'            => $subtotal,
+                    'total'               => $total,
+                    'status'              => 'pendiente',
+                ]);
+
+                foreach ($cart->items as $item) {
+                    OrderItem::create([
+                        'order_id'      => $order->id,
+                        'product_id'    => $item->product_id,
+                        'product_name'  => $item->product->name,
+                        'product_image' => $item->product->image,
+                        'color'         => $item->color,
+                        'quantity'      => $item->quantity,
+                        'unit_price'    => $item->unit_price,
+                        'subtotal'      => $item->subtotal,
+                    ]);
+                    Product::whereKey($item->product_id)->decrement('stock', $item->quantity);
+                }
+
+                return $order;
+            });
+        } catch (InsufficientStockException $e) {
+            return redirect()->route('cart.index')->with('error', $e->getMessage() . ' Ajustá tu carrito e intentá de nuevo.');
         }
 
         $order->load('items');
 
         return match ($request->payment_method) {
-            'bancard' => $this->startBancardPayment($order, $paymentMethod, $cart),
-            'pagopar' => $this->startPagoparPayment($order, $paymentMethod, $cart),
+            'bancard' => $this->startBancardPayment($order, $paymentMethod),
+            'pagopar' => $this->startPagoparPayment($order, $paymentMethod),
             default   => $this->finalizeManualOrder($order, $cart),
         };
     }
@@ -161,34 +189,45 @@ class CheckoutController extends Controller
         $order->update(['payment_status' => 'pendiente_confirmacion']);
         $this->clearCart($cart);
         session(['last_order_id' => $order->id]);
+        $this->sendOrderConfirmedEmail($order);
         return redirect()->route('checkout.confirmation', $order->order_number);
     }
 
-    private function startBancardPayment(Order $order, PaymentMethod $method, Cart $cart)
+    private function startBancardPayment(Order $order, PaymentMethod $method)
     {
         try {
             $result = (new BancardService($method))->createPayment($order);
             $order->update(['bancard_process_id' => $result['shop_process_id']]);
-            $this->clearCart($cart);
+            // El carrito se vacía recién cuando Bancard confirme el pago
+            // (bancardWebhook). Si el cliente abandona o el pago es
+            // rechazado, el carrito sigue intacto para reintentar.
             session(['last_order_id' => $order->id]);
+            $this->sendOrderConfirmedEmail($order);
             return redirect()->away($result['payment_url']);
         } catch (\Throwable $e) {
+            $previousStatus = $order->status;
             $order->update(['status' => 'cancelado', 'payment_status' => 'rechazado']);
+            StockService::restoreIfNewlyCancelled($order, $previousStatus, 'cancelado');
             return redirect()->route('checkout.index')->withInput()
                 ->with('error', 'No se pudo iniciar el pago con Bancard: ' . $e->getMessage());
         }
     }
 
-    private function startPagoparPayment(Order $order, PaymentMethod $method, Cart $cart)
+    private function startPagoparPayment(Order $order, PaymentMethod $method)
     {
         try {
             $result = (new PagoparService($method))->createOrder($order);
             $order->update(['pagopar_hash' => $result['hash']]);
-            $this->clearCart($cart);
+            // El carrito se vacía recién cuando Pagopar confirme el pago
+            // (pagoparWebhook / pagoparReturn). Si el cliente abandona o el
+            // pago es rechazado, el carrito sigue intacto para reintentar.
             session(['last_order_id' => $order->id]);
+            $this->sendOrderConfirmedEmail($order);
             return redirect()->away($result['redirect_url']);
         } catch (\Throwable $e) {
+            $previousStatus = $order->status;
             $order->update(['status' => 'cancelado', 'payment_status' => 'rechazado']);
+            StockService::restoreIfNewlyCancelled($order, $previousStatus, 'cancelado');
             return redirect()->route('checkout.index')->withInput()
                 ->with('error', 'No se pudo iniciar el pago con Pagopar: ' . $e->getMessage());
         }
@@ -198,6 +237,33 @@ class CheckoutController extends Controller
     {
         $cart->items()->delete();
         $cart->delete();
+    }
+
+    /**
+     * Vacía el carrito de un pedido recién cuando el pago ya fue confirmado
+     * como aprobado por la pasarela (webhook o retorno), nunca antes.
+     */
+    private function clearCartOnceConfirmed(Order $order): void
+    {
+        if ($order->cart) {
+            $this->clearCart($order->cart);
+        }
+    }
+
+    /**
+     * Un fallo de SMTP no debe tirar abajo un checkout que ya se completó
+     * correctamente: se registra el error y se sigue.
+     */
+    private function sendOrderConfirmedEmail(Order $order): void
+    {
+        try {
+            Mail::to($order->customer_email)->send(new OrderConfirmed($order));
+        } catch (\Throwable $e) {
+            Log::error('No se pudo enviar el correo de confirmación de pedido.', [
+                'order_id' => $order->id,
+                'error'    => $e->getMessage(),
+            ]);
+        }
     }
 
     public function confirmation(string $orderNumber)
@@ -232,12 +298,22 @@ class CheckoutController extends Controller
         }
 
         $method = PaymentMethod::getProvider('bancard');
-        $approved = $method ? (new BancardService($method))->isWebhookApproved($payload) : false;
+        // El payload que llega acá es del atacante en potencia: solo se usa para
+        // ubicar el pedido. El estado de aprobación se valida siempre contra el
+        // propio servidor de Bancard (firmado con la private_key), nunca contra
+        // lo que diga este body.
+        $approved = $method && (new BancardService($method))->confirmPayment((string) $shopProcessId)['approved'];
 
+        $previousStatus = $order->status;
+        $newStatus = $approved ? 'confirmado' : 'cancelado';
         $order->update([
             'payment_status' => $approved ? 'pagado' : 'rechazado',
-            'status'         => $approved ? 'confirmado' : 'cancelado',
+            'status'         => $newStatus,
         ]);
+        StockService::restoreIfNewlyCancelled($order, $previousStatus, $newStatus);
+        if ($approved) {
+            $this->clearCartOnceConfirmed($order);
+        }
 
         return response()->json(['status' => 'ok']);
     }
@@ -266,10 +342,16 @@ class CheckoutController extends Controller
 
         if ($order) {
             $check = $service->queryOrder($hashPedido);
+            $previousStatus = $order->status;
+            $newStatus = $check['pagado'] ? 'confirmado' : ($check['cancelado'] ? 'cancelado' : 'pendiente');
             $order->update([
                 'payment_status' => $check['pagado'] ? 'pagado' : ($check['cancelado'] ? 'rechazado' : 'pendiente'),
-                'status'         => $check['pagado'] ? 'confirmado' : ($check['cancelado'] ? 'cancelado' : 'pendiente'),
+                'status'         => $newStatus,
             ]);
+            StockService::restoreIfNewlyCancelled($order, $previousStatus, $newStatus);
+            if ($check['pagado']) {
+                $this->clearCartOnceConfirmed($order);
+            }
         }
 
         return response()->json($payload['resultado'] ?? [], 200);
@@ -286,10 +368,16 @@ class CheckoutController extends Controller
             $method = PaymentMethod::getProvider('pagopar');
             if ($method) {
                 $check = (new PagoparService($method))->queryOrder($hash);
+                $previousStatus = $order->status;
+                $newStatus = $check['pagado'] ? 'confirmado' : ($check['cancelado'] ? 'cancelado' : 'pendiente');
                 $order->update([
                     'payment_status' => $check['pagado'] ? 'pagado' : ($check['cancelado'] ? 'rechazado' : 'pendiente'),
-                    'status'         => $check['pagado'] ? 'confirmado' : ($check['cancelado'] ? 'cancelado' : 'pendiente'),
+                    'status'         => $newStatus,
                 ]);
+                StockService::restoreIfNewlyCancelled($order, $previousStatus, $newStatus);
+                if ($check['pagado']) {
+                    $this->clearCartOnceConfirmed($order);
+                }
             }
         }
 

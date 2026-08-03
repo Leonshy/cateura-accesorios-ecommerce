@@ -81,7 +81,11 @@ class MediaAdminController extends Controller
             throw new \RuntimeException('El archivo no es una imagen válida.');
         }
 
-        $reencodedTmp = $isImage ? $this->stripExifAndReencode($sourcePath, $realMime) : null;
+        $reencodedTmp = match (true) {
+            $isImage                        => $this->stripExifAndReencode($sourcePath, $realMime),
+            $realMime === 'image/svg+xml'   => $this->sanitizeSvg($sourcePath),
+            default                          => null,
+        };
 
         $safeExt  = self::ALLOWED_MIME_TYPES[$realMime];
         $baseName = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
@@ -93,6 +97,19 @@ class MediaAdminController extends Controller
         }
         copy($reencodedTmp ?? $sourcePath, $destination);
 
+        // Miniatura para catálogo/listados: mismo directorio, sufijo "-thumb".
+        // Solo tiene sentido para imágenes rasterizadas (no SVG/PDF).
+        $thumbRelativePath = null;
+        if ($isImage) {
+            $thumbTmp = $this->generateThumbnail($reencodedTmp ?? $sourcePath, $realMime);
+            if ($thumbTmp) {
+                $thumbName = pathinfo($safeName, PATHINFO_FILENAME) . '-thumb.' . $safeExt;
+                copy($thumbTmp, storage_path('app/public/media/' . $thumbName));
+                @unlink($thumbTmp);
+                $thumbRelativePath = 'media/' . $thumbName;
+            }
+        }
+
         if ($reencodedTmp && file_exists($reencodedTmp)) {
             @unlink($reencodedTmp);
         }
@@ -100,6 +117,7 @@ class MediaAdminController extends Controller
         return MediaFile::create([
             'file_name'   => $file->getClientOriginalName(),
             'file_path'   => 'media/' . $safeName,
+            'thumb_path'  => $thumbRelativePath,
             'file_url'    => Storage::disk('public')->url('media/' . $safeName),
             'mime_type'   => $realMime,
             'file_size'   => filesize($destination),
@@ -160,6 +178,88 @@ class MediaAdminController extends Controller
         }
     }
 
+    /**
+     * Miniatura reducida (máx. 600px de lado más largo) para el catálogo y la
+     * biblioteca de medios. Las tarjetas de producto no necesitan la foto
+     * original completa (a veces 2-4MB de una cámara/celular) para mostrarse
+     * en ~300px — antes se servía siempre el archivo completo.
+     */
+    private function generateThumbnail(string $path, string $mime, int $maxDimension = 600): ?string
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'thumb_');
+
+        try {
+            $img = match ($mime) {
+                'image/jpeg' => @imagecreatefromjpeg($path),
+                'image/png'  => @imagecreatefrompng($path),
+                'image/gif'  => @imagecreatefromgif($path),
+                'image/webp' => @imagecreatefromwebp($path),
+                default      => null,
+            };
+
+            if (! $img) {
+                @unlink($tmp);
+                return null;
+            }
+
+            $width  = imagesx($img);
+            $height = imagesy($img);
+            $scale  = min(1, $maxDimension / max($width, $height));
+            $thumbWidth  = max(1, (int) round($width * $scale));
+            $thumbHeight = max(1, (int) round($height * $scale));
+
+            $thumb = imagecreatetruecolor($thumbWidth, $thumbHeight);
+            if (in_array($mime, ['image/png', 'image/webp', 'image/gif'], true)) {
+                imagealphablending($thumb, false);
+                imagesavealpha($thumb, true);
+            }
+            imagecopyresampled($thumb, $img, 0, 0, 0, 0, $thumbWidth, $thumbHeight, $width, $height);
+            imagedestroy($img);
+
+            match ($mime) {
+                'image/jpeg' => imagejpeg($thumb, $tmp, 82),
+                'image/png'  => imagepng($thumb, $tmp, 7),
+                'image/gif'  => imagegif($thumb, $tmp),
+                'image/webp' => imagewebp($thumb, $tmp, 78),
+                default      => null,
+            };
+
+            imagedestroy($thumb);
+
+            return $tmp;
+        } catch (\Throwable) {
+            @unlink($tmp);
+            return null;
+        }
+    }
+
+    /**
+     * Un SVG es XML: puede traer <script> o manejadores de eventos embebidos
+     * que se ejecutarían si el archivo se abre directo en el navegador. Se
+     * limpia con una librería dedicada antes de guardarlo, igual que las
+     * imágenes rasterizadas pasan por stripExifAndReencode().
+     */
+    private function sanitizeSvg(string $path): string
+    {
+        $dirty = file_get_contents($path);
+        if ($dirty === false || trim($dirty) === '') {
+            throw new \RuntimeException('El archivo SVG está vacío o no se pudo leer.');
+        }
+
+        $sanitizer = new \enshrined\svgSanitize\Sanitizer();
+        $sanitizer->removeRemoteReferences(true);
+        $clean = $sanitizer->sanitize($dirty);
+
+        if ($clean === false || trim($clean) === '') {
+            throw new \RuntimeException('El archivo SVG no pudo procesarse de forma segura.');
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'upload_svg_');
+        file_put_contents($tmp, $clean);
+
+        return $tmp;
+    }
+
     public function updateAlt(Request $request, MediaFile $media)
     {
         $request->validate(['alt_text' => 'nullable|string|max:255']);
@@ -171,6 +271,9 @@ class MediaAdminController extends Controller
     {
         if (Storage::disk('public')->exists($media->file_path)) {
             Storage::disk('public')->delete($media->file_path);
+        }
+        if ($media->thumb_path && Storage::disk('public')->exists($media->thumb_path)) {
+            Storage::disk('public')->delete($media->thumb_path);
         }
         $media->delete();
         return response()->json(['ok' => true]);
@@ -209,6 +312,7 @@ class MediaAdminController extends Controller
             'id'         => $f->id,
             'file_name'  => $f->file_name,
             'file_url'   => $f->file_url,
+            'thumb_url'  => $f->thumb_url,
             'mime_type'  => $f->mime_type,
             'file_size'  => $f->file_size,
             'alt_text'   => $f->alt_text,

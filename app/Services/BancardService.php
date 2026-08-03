@@ -105,12 +105,4 @@ class BancardService
         ];
     }
 
-    /**
-     * Interpreta el payload recibido en el webhook de Bancard.
-     */
-    public function isWebhookApproved(array $payload): bool
-    {
-        $operation = $payload['operation'] ?? [];
-        return ($operation['response'] ?? null) === 'S' && ($operation['response_code'] ?? null) === '00';
-    }
 }

@@ -142,7 +142,7 @@
     <div class="max-w-7xl mx-auto px-4">
         <div class="grid md:grid-cols-2 gap-16 items-center">
             @php
-                $historia = \App\Models\SiteSetting::group('content');
+                $historia = \App\Models\SiteSetting::group('content_home');
                 $historiaImgs = [
                     !empty($historia['historia_img1']) ? media_url($historia['historia_img1']) : asset('assets/institucional/artesana-boceto.jpg'),
                     !empty($historia['historia_img2']) ? media_url($historia['historia_img2']) : asset('assets/institucional/taller-mujeres.jpg'),

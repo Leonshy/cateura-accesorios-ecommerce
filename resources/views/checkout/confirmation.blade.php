@@ -13,14 +13,17 @@
         <p class="text-stone-500 mb-8">Hemos enviado los detalles a <strong>{{ $order->customer_email }}</strong>. Nos contactaremos en breve para coordinar el envío.</p>
 
         @if($order->payment_method === 'transferencia')
+        @php
+            $transferMethod = \App\Models\PaymentMethod::where('key', 'transferencia')->first();
+        @endphp
         <div class="bg-amber-50 border border-amber-200 p-5 text-left mb-8 text-sm">
-            <p class="font-medium text-amber-800 mb-3">📋 Datos para transferencia bancaria</p>
-            <p class="text-amber-700 mb-2">Realice la transferencia a la siguiente cuenta y envíenos el comprobante por WhatsApp o email:</p>
+            <p class="font-medium text-amber-800 mb-3">📋 Datos de la transferencia</p>
+            <p class="text-amber-700 mb-2">Ya recibimos tu comprobante. Estos son los datos de la cuenta a la que transferiste, por si necesitás revisarlos:</p>
             <div class="space-y-1 text-amber-800">
-                <p><strong>Banco:</strong> {{ \App\Models\SiteSetting::get('bank_name', 'Banco Nacional de Fomento') }}</p>
-                <p><strong>Cuenta:</strong> {{ \App\Models\SiteSetting::get('bank_account', '—') }}</p>
-                <p><strong>Titular:</strong> {{ \App\Models\SiteSetting::get('bank_titular', 'Asociación Mujeres Unidas del Bañado Sur') }}</p>
-                <p><strong>CI titular:</strong> {{ \App\Models\SiteSetting::get('bank_ci', '—') }}</p>
+                <p><strong>Banco:</strong> {{ $transferMethod->credentials['bank_name'] ?? '—' }}</p>
+                <p><strong>Cuenta:</strong> {{ $transferMethod->credentials['bank_account'] ?? '—' }}</p>
+                <p><strong>Titular:</strong> {{ $transferMethod->credentials['bank_titular'] ?? '—' }}</p>
+                <p><strong>CI titular:</strong> {{ $transferMethod->credentials['bank_ci'] ?? '—' }}</p>
                 <p><strong>Importe:</strong> Gs. {{ number_format($order->total, 0, ',', '.') }}</p>
                 <p><strong>Referencia:</strong> {{ $order->order_number }}</p>
             </div>

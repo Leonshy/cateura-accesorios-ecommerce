@@ -35,7 +35,7 @@ class CategoryAdminController extends Controller
 
     public function edit(Category $category)
     {
-        $category->load(['subcategories' => fn ($q) => $q->orderBy('order')]);
+        $category->load(['subcategories' => fn ($q) => $q->ordered()]);
         return view('admin.categories.edit', compact('category'));
     }
 

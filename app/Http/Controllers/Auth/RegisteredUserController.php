@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\HCaptchaVerifier;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,6 +36,12 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
+
+        if (HCaptchaVerifier::isEnabledFor('register') && ! HCaptchaVerifier::verify($request->input('h-captcha-response'))) {
+            throw ValidationException::withMessages([
+                'h-captcha-response' => 'No pudimos verificar que sos una persona. Intentá de nuevo.',
+            ]);
+        }
 
         $user = User::create([
             'name' => $request->name,

@@ -1,0 +1,161 @@
+@extends('layouts.admin')
+@section('title', 'Textos')
+@section('content')
+<div class="max-w-2xl">
+@include('admin.content._tabs', ['active' => 'about'])
+<form action="{{ route('admin.content.about.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    @csrf
+    @if(session('success'))
+    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm">{{ session('success') }}</div>
+    @endif
+
+    <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
+        <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Hero</h3>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Texto pequeño (eyebrow)</label>
+            <input type="text" name="about_hero_eyebrow" value="{{ $settings['about_hero_eyebrow'] ?? 'Quiénes somos' }}" class="input-cateura border p-2 w-full">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+            <input type="text" name="about_hero_title" value="{{ $settings['about_hero_title'] ?? 'Una historia de resiliencia y arte' }}" class="input-cateura border p-2 w-full">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Texto</label>
+            <textarea name="about_hero_text" rows="3" class="input-cateura border p-2 w-full">{{ $settings['about_hero_text'] ?? 'Cateura Accesorios nació en el corazón del Bañado Sur de Asunción, donde mujeres emprendedoras transforman materiales reciclados del instrumento más famoso del mundo en joyas y accesorios únicos.' }}</textarea>
+        </div>
+    </div>
+
+    <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
+        <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Nuestra historia</h3>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Texto pequeño (eyebrow)</label>
+            <input type="text" name="about_historia_eyebrow" value="{{ $settings['about_historia_eyebrow'] ?? 'Nuestra historia' }}" class="input-cateura border p-2 w-full">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+            <input type="text" name="about_historia_title" value="{{ $settings['about_historia_title'] ?? 'Del vertedero al mundo' }}" class="input-cateura border p-2 w-full">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Párrafo 1</label>
+            <textarea name="about_historia_text1" rows="3" class="input-cateura border p-2 w-full">{{ $settings['about_historia_text1'] ?? 'La Asociación Mujeres Unidas del Bañado Sur es una organización comunitaria que trabaja para generar empleo digno y sustentable para las familias del barrio. Inspiradas por la orquesta de instrumentos reciclados de Cateura, estas mujeres decidieron convertir el material desechado en arte.' }}</textarea>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Párrafo 2</label>
+            <textarea name="about_historia_text2" rows="3" class="input-cateura border p-2 w-full">{{ $settings['about_historia_text2'] ?? 'Cada accesorio que crea Cateura Accesorios lleva consigo una historia de superación, creatividad y comunidad. Los materiales provienen de residuos que son transformados con maestría artesanal en piezas de joyería, objetos para el hogar y textiles únicos.' }}</textarea>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Párrafo 3</label>
+            <textarea name="about_historia_text3" rows="3" class="input-cateura border p-2 w-full">{{ $settings['about_historia_text3'] ?? 'Cuando compras un producto Cateura Accesorios, contribuís directamente al sustento de familias paraguayas y a un modelo de economía circular que cuida el planeta.' }}</textarea>
+        </div>
+        <x-admin.media-picker name="about_hero_image" value="{{ $settings['about_hero_image'] ?? '' }}" label="Foto institucional" />
+    </div>
+
+    <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
+        <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Encabezado de "Nuestros valores"</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-medium text-stone-600 mb-1">Texto pequeño (eyebrow)</label>
+                <input type="text" name="about_valores_eyebrow" value="{{ $settings['about_valores_eyebrow'] ?? 'Lo que nos mueve' }}" class="input-cateura border p-2 w-full">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+                <input type="text" name="about_valores_title" value="{{ $settings['about_valores_title'] ?? 'Nuestros valores' }}" class="input-cateura border p-2 w-full">
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
+        <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Llamado a la acción final</h3>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+            <input type="text" name="about_cta_title" value="{{ $settings['about_cta_title'] ?? 'Conocé a nuestras artesanas' }}" class="input-cateura border p-2 w-full">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Texto</label>
+            <input type="text" name="about_cta_text" value="{{ $settings['about_cta_text'] ?? 'Detrás de cada pieza hay una mujer con una historia extraordinaria.' }}" class="input-cateura border p-2 w-full">
+        </div>
+    </div>
+
+    <button type="submit" class="btn-copper">Guardar cambios</button>
+</form>
+
+<div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4 mt-6">
+    <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Lista de valores (en escritorio se muestran 4 por fila)</h3>
+
+    <div class="space-y-3">
+        @forelse($aboutValues as $value)
+        <div class="border border-stone-100 p-4 space-y-3">
+            <form action="{{ route('admin.about-values.update', $value) }}" method="POST" class="space-y-3">
+                @csrf @method('PATCH')
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+                        <input type="text" name="title" value="{{ $value->title }}" class="input-cateura border p-2 w-full text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Ícono</label>
+                        <select name="icon" class="input-cateura border p-2 w-full text-sm bg-white">
+                            @foreach(\App\Models\AboutValue::iconOptions() as $key => $label)
+                            <option value="{{ $key }}" {{ $value->icon === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">Texto</label>
+                    <textarea name="text" rows="2" class="input-cateura border p-2 w-full text-sm">{{ $value->text }}</textarea>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Orden</label>
+                        <input type="number" name="order" value="{{ $value->order }}" min="0" class="input-cateura border p-2 w-20 text-sm">
+                    </div>
+                    <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer">
+                        <input type="checkbox" name="is_active" value="1" {{ $value->is_active ? 'checked' : '' }} class="text-copper-500">
+                        Activo
+                    </label>
+                    <button type="submit" class="btn-copper py-1.5 px-3 text-xs ml-auto">Guardar</button>
+                </div>
+            </form>
+            <form action="{{ route('admin.about-values.destroy', $value) }}" method="POST" onsubmit="return confirm('¿Eliminar este valor?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="text-xs text-stone-400 hover:text-red-500">Eliminar "{{ $value->title }}"</button>
+            </form>
+        </div>
+        @empty
+        <p class="text-sm text-stone-400 py-2">Todavía no hay valores cargados.</p>
+        @endforelse
+    </div>
+
+    <form action="{{ route('admin.about-values.store') }}" method="POST" class="border-t border-stone-100 pt-4 space-y-3">
+        @csrf
+        <p class="text-sm font-medium text-stone-700">Agregar nuevo valor</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label class="block text-xs font-medium text-stone-600 mb-1">Título</label>
+                <input type="text" name="title" required class="input-cateura border p-2 w-full text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-600 mb-1">Ícono</label>
+                <select name="icon" class="input-cateura border p-2 w-full text-sm bg-white">
+                    @foreach(\App\Models\AboutValue::iconOptions() as $key => $label)
+                    <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-stone-600 mb-1">Texto</label>
+            <textarea name="text" rows="2" required class="input-cateura border p-2 w-full text-sm"></textarea>
+        </div>
+        <div class="flex items-center gap-3">
+            <div>
+                <label class="block text-xs font-medium text-stone-600 mb-1">Orden</label>
+                <input type="number" name="order" value="{{ $aboutValues->count() + 1 }}" min="0" class="input-cateura border p-2 w-20 text-sm">
+            </div>
+            <button type="submit" class="btn-copper py-2 px-4 text-xs ml-auto">+ Agregar valor</button>
+        </div>
+    </form>
+</div>
+</div>
+@endsection

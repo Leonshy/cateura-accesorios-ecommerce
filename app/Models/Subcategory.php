@@ -18,4 +18,14 @@ class Subcategory extends Model
     public function category() { return $this->belongsTo(Category::class); }
     public function products() { return $this->hasMany(Product::class); }
     public function scopeActive($q) { return $q->where('is_active', true); }
+
+    /**
+     * El campo `order` puede repetirse entre filas (varias subcategorías creadas
+     * con el mismo valor). Se ordena también por id para que el orden mostrado
+     * sea siempre determinístico y estable.
+     */
+    public function scopeOrdered($q)
+    {
+        return $q->orderBy('order')->orderBy('id');
+    }
 }

@@ -13,7 +13,7 @@
                     Tienda <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <div x-show="open" class="pl-4 py-2 space-y-2">
-                    @foreach(\App\Models\Category::active()->orderBy('order')->get() as $cat)
+                    @foreach(\App\Models\Category::activeOrderedCached() as $cat)
                     <a href="{{ route('shop.index', ['categoria' => $cat->slug]) }}" class="block py-2 text-stone-600 text-sm">{{ $cat->name }}</a>
                     @endforeach
                 </div>

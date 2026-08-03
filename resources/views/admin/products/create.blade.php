@@ -2,7 +2,12 @@
 @section('title', 'Nuevo producto')
 @section('content')
 <div class="max-w-4xl">
-<form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+<form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6"
+      x-data="{
+          categoryId: '{{ old('category_id') }}',
+          subcategoryId: '{{ old('subcategory_id') }}',
+          categories: {{ Illuminate\Support\Js::from($categories->map(fn($c) => ['id' => $c->id, 'subcategories' => $c->subcategories->map(fn($s) => ['id' => $s->id, 'name' => $s->name])])) }}
+      }">
     @csrf
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
@@ -13,15 +18,28 @@
                     <input type="text" name="name" value="{{ old('name') }}" required class="input-cateura border p-2 w-full">
                     @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-stone-600 mb-1">Categoría *</label>
-                        <select name="category_id" required class="input-cateura border p-2 w-full">
+                        <select name="category_id" required class="input-cateura border p-2 w-full"
+                                x-model="categoryId" @change="subcategoryId = ''">
                             <option value="">Seleccionar...</option>
                             @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                             @endforeach
                         </select>
+                        @error('category_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Subcategoría</label>
+                        <select name="subcategory_id" class="input-cateura border p-2 w-full"
+                                x-model="subcategoryId" :disabled="!categoryId">
+                            <option value="">Sin subcategoría</option>
+                            <template x-for="sub in (categories.find(c => c.id == categoryId)?.subcategories || [])" :key="sub.id">
+                                <option :value="sub.id" x-text="sub.name"></option>
+                            </template>
+                        </select>
+                        @error('subcategory_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-stone-600 mb-1">SKU</label>

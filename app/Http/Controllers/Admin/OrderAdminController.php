@@ -2,8 +2,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderStatusChanged;
 use App\Models\Order;
+use App\Services\StockService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class OrderAdminController extends Controller
 {
@@ -35,7 +39,33 @@ class OrderAdminController extends Controller
             'payment_status' => 'required|in:pendiente,pagado,rechazado,reembolsado,pendiente_confirmacion',
             'internal_notes' => 'nullable|string|max:2000',
         ]);
+
+        $previousStatus = $order->status;
+        $statusChanged = $previousStatus !== $request->status
+            || $order->payment_status !== $request->payment_status;
+
         $order->update($request->only('status', 'payment_status', 'internal_notes'));
+        StockService::restoreIfNewlyCancelled($order, $previousStatus, $request->status);
+
+        if ($statusChanged) {
+            $this->sendOrderStatusChangedEmail($order);
+        }
+
         return back()->with('success', 'Estado del pedido actualizado.');
+    }
+
+    /**
+     * Un fallo de SMTP no debe impedir que el admin guarde el cambio de estado.
+     */
+    private function sendOrderStatusChangedEmail(Order $order): void
+    {
+        try {
+            Mail::to($order->customer_email)->send(new OrderStatusChanged($order));
+        } catch (\Throwable $e) {
+            Log::error('No se pudo enviar el correo de cambio de estado del pedido.', [
+                'order_id' => $order->id,
+                'error'    => $e->getMessage(),
+            ]);
+        }
     }
 }

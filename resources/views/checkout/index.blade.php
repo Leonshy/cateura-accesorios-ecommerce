@@ -142,7 +142,7 @@
                                     <p class="text-xs text-stone-400 mt-0.5">
                                         @switch($method->key)
                                             @case('transferencia')
-                                                Recibirás los datos para transferir al confirmar el pedido. Tu pedido se procesará al verificar el pago.
+                                                Vas a ver los datos de la cuenta para transferir y vas a poder subir tu comprobante. Tu pedido se procesará al verificar el pago.
                                                 @break
                                             @case('pagopar')
                                                 Pago en línea con tarjeta, Tigo Money o billetera digital vía Pagopar.
@@ -157,13 +157,27 @@
                                 </div>
                             </label>
                             @endforeach
-                            <div x-show="paymentMethod === 'transferencia'" x-cloak class="p-3 bg-stone-50 border border-stone-200 space-y-2">
-                                <label class="block text-xs font-medium text-stone-600 mb-1">Comprobante de transferencia (PDF o imagen) *</label>
-                                <input type="file" name="transfer_receipt" accept=".pdf,image/jpeg,image/png"
-                                       :required="paymentMethod === 'transferencia'"
-                                       class="input-cateura border p-2 w-full text-xs bg-white">
-                                <p class="text-xs text-stone-400">Subí el comprobante de tu transferencia. Máx. 5MB (JPG, PNG o PDF). Tu pedido quedará pendiente de verificación hasta que confirmemos el pago.</p>
-                                @error('transfer_receipt')<p class="text-red-500 text-xs">{{ $message }}</p>@enderror
+                            <div x-show="paymentMethod === 'transferencia'" x-cloak class="p-3 bg-stone-50 border border-stone-200 space-y-3">
+                                @php
+                                    $transferMethod = $paymentMethods->firstWhere('key', 'transferencia');
+                                @endphp
+                                @if($transferMethod)
+                                <div class="bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 space-y-1">
+                                    <p class="font-medium mb-1">📋 Datos para la transferencia</p>
+                                    <p><strong>Banco:</strong> {{ $transferMethod->credentials['bank_name'] ?? '—' }}</p>
+                                    <p><strong>Cuenta:</strong> {{ $transferMethod->credentials['bank_account'] ?? '—' }}</p>
+                                    <p><strong>Titular:</strong> {{ $transferMethod->credentials['bank_titular'] ?? '—' }}</p>
+                                    <p><strong>CI titular:</strong> {{ $transferMethod->credentials['bank_ci'] ?? '—' }}</p>
+                                </div>
+                                @endif
+                                <div>
+                                    <label class="block text-xs font-medium text-stone-600 mb-1">Comprobante de transferencia (PDF o imagen) *</label>
+                                    <input type="file" name="transfer_receipt" accept=".pdf,image/jpeg,image/png"
+                                           :required="paymentMethod === 'transferencia'"
+                                           class="input-cateura border p-2 w-full text-xs bg-white">
+                                    <p class="text-xs text-stone-400">Primero hacé la transferencia a la cuenta de arriba y después subí el comprobante. Máx. 5MB (JPG, PNG o PDF). Tu pedido quedará pendiente de verificación hasta que confirmemos el pago.</p>
+                                    @error('transfer_receipt')<p class="text-red-500 text-xs">{{ $message }}</p>@enderror
+                                </div>
                             </div>
                             @if($paymentMethods->isEmpty())
                             <p class="text-sm text-stone-400">No hay métodos de pago disponibles por el momento. Contactanos para coordinar tu compra.</p>
@@ -198,9 +212,19 @@
                             <span>Total</span>
                             <span class="text-copper-600" x-text="'Gs. ' + new Intl.NumberFormat('es-PY').format(subtotal + (shippingType === 'pickup' ? 0 : shippingCost))"></span>
                         </div>
+                        @php
+                            $compraActive = \App\Models\LegalPage::where('key', 'compra')->value('is_active') ?? true;
+                        @endphp
                         <label class="flex items-start gap-2 mb-4 cursor-pointer">
                             <input type="checkbox" name="accept_terms" value="1" {{ old('accept_terms') ? 'checked' : '' }} required class="mt-0.5 text-copper-500">
-                            <span class="text-xs text-stone-500">Acepto los <a href="{{ route('legal.terminos') }}" class="underline hover:text-stone-700" target="_blank">términos y condiciones</a> y las <a href="{{ route('legal.compra') }}" class="underline hover:text-stone-700" target="_blank">políticas de compra</a>.</span>
+                            <span class="text-xs text-stone-500">
+                                Acepto los <a href="{{ route('legal.terminos') }}" class="underline hover:text-stone-700" target="_blank">términos y condiciones</a>
+                                @if($compraActive)
+                                y las <a href="{{ route('legal.compra') }}" class="underline hover:text-stone-700" target="_blank">políticas de compra</a>.
+                                @else
+                                .
+                                @endif
+                            </span>
                         </label>
                         @error('accept_terms')<p class="text-red-500 text-xs mb-3">Debés aceptar los términos y condiciones.</p>@enderror
                         <button type="submit" class="btn-copper w-full">Confirmar pedido</button>

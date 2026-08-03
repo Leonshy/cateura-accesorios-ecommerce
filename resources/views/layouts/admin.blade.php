@@ -26,6 +26,7 @@
                 <span x-show="sidebarOpen">Dashboard</span>
             </a>
 
+            @if(auth()->user()->isEditor())
             <div x-show="sidebarOpen" class="px-3 pt-4 pb-1">
                 <p class="text-xs font-medium text-stone-400 uppercase tracking-widest">Catálogo</p>
             </div>
@@ -41,7 +42,9 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span x-show="sidebarOpen">Artesanas</span>
             </a>
+            @endif
 
+            @if(auth()->user()->isVendedor())
             <div x-show="sidebarOpen" class="px-3 pt-4 pb-1">
                 <p class="text-xs font-medium text-stone-400 uppercase tracking-widest">Ventas</p>
             </div>
@@ -49,11 +52,9 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 <span x-show="sidebarOpen">Pedidos</span>
             </a>
-            <a href="{{ route('admin.users.index') }}" class="admin-nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                <span x-show="sidebarOpen">Clientes</span>
-            </a>
+            @endif
 
+            @if(auth()->user()->isEditor())
             <div x-show="sidebarOpen" class="px-3 pt-4 pb-1">
                 <p class="text-xs font-medium text-stone-400 uppercase tracking-widest">Contenido</p>
             </div>
@@ -65,19 +66,13 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <span x-show="sidebarOpen">Multimedia</span>
             </a>
-            <a href="{{ route('admin.settings.content') }}" class="admin-nav-link {{ request()->routeIs('admin.settings.content') ? 'active' : '' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                <span x-show="sidebarOpen">Página de inicio</span>
-            </a>
             <a href="{{ route('admin.banners.index') }}" class="admin-nav-link {{ request()->routeIs('admin.banners*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <span x-show="sidebarOpen">Banners</span>
             </a>
-            <a href="{{ route('admin.legal.index') }}" class="admin-nav-link {{ request()->routeIs('admin.legal*') ? 'active' : '' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span x-show="sidebarOpen">Páginas legales</span>
-            </a>
+            @endif
 
+            @if(auth()->user()->isVendedor())
             <div x-show="sidebarOpen" class="px-3 pt-4 pb-1">
                 <p class="text-xs font-medium text-stone-400 uppercase tracking-widest">Comunicación</p>
             </div>
@@ -89,11 +84,32 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 <span x-show="sidebarOpen">Newsletter</span>
             </a>
+            @endif
+
+            <div x-show="sidebarOpen" class="px-3 pt-4 pb-1">
+                <p class="text-xs font-medium text-stone-400 uppercase tracking-widest">Ayuda</p>
+            </div>
+            <a href="{{ route('admin.manual.index') }}" class="admin-nav-link {{ request()->routeIs('admin.manual*') ? 'active' : '' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <span x-show="sidebarOpen">Manual de uso</span>
+            </a>
 
             @if(auth()->user()->isAdmin())
             <div x-show="sidebarOpen" class="px-3 pt-4 pb-1">
-                <p class="text-xs font-medium text-stone-400 uppercase tracking-widest">Configuración</p>
+                <p class="text-xs font-medium text-stone-400 uppercase tracking-widest">Solo Admin</p>
             </div>
+            <a href="{{ route('admin.users.index') }}" class="admin-nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span x-show="sidebarOpen">Usuarios</span>
+            </a>
+            <a href="{{ route('admin.content.home') }}" class="admin-nav-link {{ request()->routeIs('admin.content.*') ? 'active' : '' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                <span x-show="sidebarOpen">Textos</span>
+            </a>
+            <a href="{{ route('admin.legal.index') }}" class="admin-nav-link {{ request()->routeIs('admin.legal*') ? 'active' : '' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span x-show="sidebarOpen">Páginas legales</span>
+            </a>
             <a href="{{ route('admin.settings.general') }}" class="admin-nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span x-show="sidebarOpen">Configuración</span>
@@ -120,12 +136,6 @@
                     <p class="text-xs text-stone-400 capitalize">{{ auth()->user()->getHighestRole() }}</p>
                 </div>
             </div>
-            <div x-show="sidebarOpen" class="mt-3 flex gap-2">
-                <a href="{{ route('home') }}" class="text-xs text-stone-500 hover:text-copper-500 transition-colors">← Sitio</a>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf<button type="submit" class="text-xs text-stone-500 hover:text-red-500 transition-colors">Salir</button>
-                </form>
-            </div>
         </div>
     </aside>
 
@@ -138,13 +148,34 @@
             </button>
             <h1 class="text-lg font-medium text-stone-800">@yield('title', 'Dashboard')</h1>
             <div class="ml-auto flex items-center gap-4">
+                <a href="{{ route('admin.manual.index') }}" title="Ayuda y manual de uso" class="flex items-center gap-1.5 text-stone-400 hover:text-copper-500 transition-colors">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    <span class="hidden sm:inline text-sm">Ayuda</span>
+                </a>
+                <a href="{{ route('home') }}" title="Visitar sitio web" target="_blank" class="flex items-center gap-1.5 text-stone-400 hover:text-copper-500 transition-colors">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <span class="hidden sm:inline text-sm">Visitar sitio</span>
+                </a>
+                @if(auth()->user()->isVendedor())
                 @php $pendingOrders = \App\Models\Order::where('status','pendiente')->count(); @endphp
-                @if($pendingOrders > 0)
-                <a href="{{ route('admin.orders.index', ['estado' => 'pendiente']) }}" class="relative text-stone-400 hover:text-copper-500 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">{{ $pendingOrders }}</span>
+                <a href="{{ route('admin.orders.index', ['estado' => 'pendiente']) }}" title="Pedidos pendientes" class="flex items-center gap-1.5 text-stone-400 hover:text-copper-500 transition-colors">
+                    <span class="relative flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        @if($pendingOrders > 0)
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">{{ $pendingOrders }}</span>
+                        @endif
+                    </span>
+                    <span class="hidden sm:inline text-sm">Pendientes</span>
                 </a>
                 @endif
+                <div class="w-px h-6 bg-stone-200"></div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" title="Salir" class="flex items-center gap-1.5 text-stone-400 hover:text-red-500 transition-colors">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span class="hidden sm:inline text-sm">Salir</span>
+                    </button>
+                </form>
             </div>
         </header>
 

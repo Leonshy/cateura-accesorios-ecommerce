@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LegalPage;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 
 class LegalAdminController extends Controller
@@ -19,7 +20,8 @@ class LegalAdminController extends Controller
     public function index()
     {
         $pages = $this->pageKeys;
-        return view('admin.legal.index', compact('pages'));
+        $legalPages = LegalPage::whereIn('key', array_keys($pages))->get()->keyBy('key');
+        return view('admin.legal.index', compact('pages', 'legalPages'));
     }
 
     public function edit(string $key)
@@ -36,6 +38,14 @@ class LegalAdminController extends Controller
             'title'   => 'required|string|max:255',
             'content' => 'required|string',
         ]);
+        $data['content'] = HtmlSanitizer::clean($data['content']);
+
+        // Privacidad y términos son de aceptación obligatoria en el checkout:
+        // siempre quedan visibles, sin importar lo que llegue en el formulario.
+        $data['is_active'] = in_array($key, LegalPage::ALWAYS_VISIBLE_KEYS, true)
+            ? true
+            : $request->boolean('is_active');
+
         LegalPage::updateOrCreate(['key' => $key], $data);
         return back()->with('success', 'Página actualizada correctamente.');
     }

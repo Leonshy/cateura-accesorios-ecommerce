@@ -5,6 +5,31 @@
 <meta property="og:title" content="{{ $product->meta_title ?? $product->name }}">
 <meta property="og:description" content="{{ $product->meta_description ?? $product->short_description }}">
 @if($product->image)<meta property="og:image" content="{{ $product->main_image }}">@endif
+<script type="application/ld+json">
+{!! json_encode([
+    '@@context' => 'https://schema.org',
+    '@type' => 'Product',
+    'name' => $product->name,
+    'description' => $product->short_description ?? $product->meta_description ?? $product->description,
+    'image' => $product->main_image,
+    'sku' => $product->sku,
+    'brand' => ['@type' => 'Brand', 'name' => 'Cateura Accesorios'],
+    'offers' => [
+        '@type' => 'Offer',
+        'url' => route('shop.product', $product->slug),
+        'priceCurrency' => 'PYG',
+        'price' => (string) $product->price,
+        'availability' => $product->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    ],
+    ...($product->rating_count > 0 ? [
+        'aggregateRating' => [
+            '@type' => 'AggregateRating',
+            'ratingValue' => (string) $product->rating_avg,
+            'reviewCount' => (string) $product->rating_count,
+        ],
+    ] : []),
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
 @endpush
 @section('content')
 

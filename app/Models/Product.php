@@ -58,4 +58,16 @@ class Product extends Model
             ? media_url($this->image)
             : asset('assets/images/placeholder-product.jpg');
     }
+
+    /**
+     * Versión liviana de la imagen para tarjetas de catálogo/listados (home,
+     * tienda, productos relacionados). El detalle del producto sigue usando
+     * main_image a resolución completa.
+     */
+    public function getCatalogImageAttribute(): string
+    {
+        return $this->image
+            ? catalog_thumb_url($this->image)
+            : asset('assets/images/placeholder-product.jpg');
+    }
 }

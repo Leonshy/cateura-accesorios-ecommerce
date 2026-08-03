@@ -36,22 +36,39 @@
     <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm">{{ session('success') }}</div>
     @endif
 
+    <p class="text-xs text-stone-400 -mt-2">Usá las flechas para definir el orden en que aparecen en la tienda.</p>
+
     <div class="space-y-2">
         @forelse($category->subcategories as $sub)
-        <form action="{{ route('admin.subcategories.update', $sub) }}" method="POST" class="flex items-center gap-3 p-3 border border-stone-100">
-            @csrf @method('PATCH')
-            <input type="text" name="name" value="{{ $sub->name }}" class="input-cateura border p-2 flex-1 text-sm">
-            <input type="number" name="order" value="{{ $sub->order }}" min="0" class="input-cateura border p-2 w-20 text-sm" title="Orden">
-            <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer flex-shrink-0">
-                <input type="checkbox" name="is_active" value="1" {{ $sub->is_active ? 'checked' : '' }} class="text-copper-500">
-                Activa
-            </label>
-            <button type="submit" class="text-copper-500 hover:text-copper-600 text-xs flex-shrink-0">Guardar</button>
-        </form>
-        <form action="{{ route('admin.subcategories.destroy', $sub) }}" method="POST" onsubmit="return confirm('¿Eliminar esta subcategoría?')" class="-mt-2 mb-1 pl-3">
-            @csrf @method('DELETE')
-            <button type="submit" class="text-xs text-stone-400 hover:text-red-500">Eliminar "{{ $sub->name }}"</button>
-        </form>
+        <div class="flex items-center gap-3 p-3 border border-stone-100">
+            <div class="flex flex-col flex-shrink-0">
+                <form action="{{ route('admin.subcategories.move-up', $sub) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="block text-stone-400 hover:text-copper-500 disabled:opacity-20 disabled:hover:text-stone-400" title="Subir" {{ $loop->first ? 'disabled' : '' }}>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                    </button>
+                </form>
+                <form action="{{ route('admin.subcategories.move-down', $sub) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="block text-stone-400 hover:text-copper-500 disabled:opacity-20 disabled:hover:text-stone-400" title="Bajar" {{ $loop->last ? 'disabled' : '' }}>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                </form>
+            </div>
+            <form action="{{ route('admin.subcategories.update', $sub) }}" method="POST" class="flex items-center gap-3 flex-1">
+                @csrf @method('PATCH')
+                <input type="text" name="name" value="{{ $sub->name }}" class="input-cateura border p-2 flex-1 text-sm">
+                <label class="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer flex-shrink-0">
+                    <input type="checkbox" name="is_active" value="1" {{ $sub->is_active ? 'checked' : '' }} class="text-copper-500">
+                    Activa
+                </label>
+                <button type="submit" class="text-copper-500 hover:text-copper-600 text-xs flex-shrink-0">Guardar</button>
+            </form>
+            <form action="{{ route('admin.subcategories.destroy', $sub) }}" method="POST" onsubmit="return confirm('¿Eliminar esta subcategoría?')" class="flex-shrink-0">
+                @csrf @method('DELETE')
+                <button type="submit" class="text-xs text-stone-400 hover:text-red-500">Eliminar</button>
+            </form>
+        </div>
         @empty
         <p class="text-sm text-stone-400 py-2">Todavía no hay subcategorías en esta categoría.</p>
         @endforelse
@@ -60,7 +77,6 @@
     <form action="{{ route('admin.subcategories.store', $category) }}" method="POST" class="flex items-center gap-3 pt-3 border-t border-stone-100">
         @csrf
         <input type="text" name="name" placeholder="Nombre de la nueva subcategoría" required class="input-cateura border p-2 flex-1 text-sm">
-        <input type="number" name="order" value="0" min="0" class="input-cateura border p-2 w-20 text-sm" title="Orden">
         <button type="submit" class="btn-copper py-2 px-4 text-xs flex-shrink-0">+ Agregar</button>
     </form>
 </div>

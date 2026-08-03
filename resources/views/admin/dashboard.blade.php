@@ -3,6 +3,7 @@
 @section('content')
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
+    @if($canEditor)
     <div class="bg-white border border-stone-100 shadow-sm p-5 rounded-lg">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 bg-copper-100 rounded-lg flex items-center justify-center">
@@ -12,6 +13,8 @@
         <p class="text-2xl font-bold text-stone-800">{{ $totalProducts }}</p>
         <p class="text-xs text-stone-400 uppercase tracking-wider mt-1">Productos activos</p>
     </div>
+    @endif
+    @if($canVendedor)
     <div class="bg-white border border-stone-100 shadow-sm p-5 rounded-lg">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -21,6 +24,8 @@
         <p class="text-2xl font-bold text-stone-800">{{ $pendingOrders }}</p>
         <p class="text-xs text-stone-400 uppercase tracking-wider mt-1">Pedidos pendientes</p>
     </div>
+    @endif
+    @if($totalCustomers !== null)
     <div class="bg-white border border-stone-100 shadow-sm p-5 rounded-lg">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -30,6 +35,8 @@
         <p class="text-2xl font-bold text-stone-800">{{ $totalCustomers }}</p>
         <p class="text-xs text-stone-400 uppercase tracking-wider mt-1">Clientes registrados</p>
     </div>
+    @endif
+    @if($canVendedor)
     <div class="bg-white border border-stone-100 shadow-sm p-5 rounded-lg">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -39,9 +46,11 @@
         <p class="text-lg font-bold text-stone-800">Gs. {{ number_format($revenue, 0, ',', '.') }}</p>
         <p class="text-xs text-stone-400 uppercase tracking-wider mt-1">Ingresos confirmados</p>
     </div>
+    @endif
 </div>
 
 <div class="grid md:grid-cols-2 gap-8">
+    @if($canVendedor)
     {{-- Recent orders --}}
     <div class="bg-white border border-stone-100 shadow-sm rounded-lg overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-stone-100">
@@ -65,7 +74,9 @@
             @endforelse
         </div>
     </div>
+    @endif
 
+    @if($canEditor)
     {{-- Low stock --}}
     <div class="bg-white border border-stone-100 shadow-sm rounded-lg overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-stone-100">
@@ -91,14 +102,18 @@
             @endforelse
         </div>
     </div>
+    @endif
 </div>
 
 {{-- Quick actions --}}
 <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+    @if($canEditor)
     <a href="{{ route('admin.products.create') }}" class="bg-copper-500 text-white p-4 rounded-lg text-center hover:bg-copper-600 transition-colors">
         <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         <span class="text-xs uppercase tracking-wider">Nuevo producto</span>
     </a>
+    @endif
+    @if($canVendedor)
     <a href="{{ route('admin.orders.index', ['estado' => 'pendiente']) }}" class="bg-yellow-500 text-white p-4 rounded-lg text-center hover:bg-yellow-600 transition-colors">
         <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
         <span class="text-xs uppercase tracking-wider">Pedidos pendientes ({{ $pendingOrders }})</span>
@@ -107,9 +122,12 @@
         <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         <span class="text-xs uppercase tracking-wider">Mensajes ({{ $unreadMessages }})</span>
     </a>
+    @endif
+    @if(auth()->user()->isAdmin())
     <a href="{{ route('admin.settings.general') }}" class="bg-stone-700 text-white p-4 rounded-lg text-center hover:bg-stone-800 transition-colors">
         <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <span class="text-xs uppercase tracking-wider">Configuración</span>
     </a>
+    @endif
 </div>
 @endsection

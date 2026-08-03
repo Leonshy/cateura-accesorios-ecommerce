@@ -12,11 +12,21 @@
 
 <header class="sticky top-0 z-30 bg-white border-b border-stone-100 shadow-sm">
     {{-- Top bar --}}
+    @php
+        $topBarPhone = \App\Models\SiteSetting::get('contact_phone', '0981 877 315');
+        $topBarInstagram = \App\Models\SiteSetting::get('instagram_url');
+    @endphp
     <div class="bg-stone-800 text-white text-xs py-2 hidden md:block">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-            <span>Envíos a todo Paraguay · <a href="tel:+595981877315" class="hover:text-copper-300 transition-colors">0981 877 315</a></span>
+            <span>Envíos a todo Paraguay
+                @if(filled($topBarPhone))
+                · <a href="{{ paraguay_tel_href($topBarPhone) }}" class="hover:text-copper-300 transition-colors">{{ $topBarPhone }}</a>
+                @endif
+            </span>
             <div class="flex items-center gap-4">
-                <a href="https://www.instagram.com/cateurapy" target="_blank" rel="noopener" class="hover:text-copper-300 transition-colors">@cateurapy</a>
+                @if(is_complete_url($topBarInstagram))
+                <a href="{{ $topBarInstagram }}" target="_blank" rel="noopener" class="hover:text-copper-300 transition-colors">Instagram</a>
+                @endif
                 @auth
                     <a href="{{ route('account.index') }}" class="hover:text-copper-300 transition-colors">Mi cuenta</a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">@csrf<button type="submit" class="hover:text-copper-300 transition-colors">Salir</button></form>
@@ -51,7 +61,7 @@
                         <svg class="inline w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </a>
                     <div x-show="shopOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="absolute top-full left-0 w-56 bg-white shadow-xl border border-stone-100 py-2 z-50" style="display:none;">
-                        @foreach(\App\Models\Category::active()->orderBy('order')->get() as $cat)
+                        @foreach(\App\Models\Category::activeOrderedCached() as $cat)
                         <a href="{{ route('shop.index', ['categoria' => $cat->slug]) }}" class="block px-4 py-2 text-sm text-stone-600 hover:bg-copper-50 hover:text-copper-600 transition-colors">{{ $cat->name }}</a>
                         @endforeach
                         <div class="border-t border-stone-100 mt-1 pt-1">

@@ -3,7 +3,7 @@
 @section('content')
 <section class="py-16 md:py-24">
     <div class="container mx-auto px-4">
-        @php($content = \App\Models\SiteSetting::group('content'))
+        @php($content = \App\Models\SiteSetting::group('content_artisans'))
         <div class="text-center mb-12">
             <p class="section-subtitle mb-2">{{ $content['artisans_eyebrow'] ?? 'Mujeres Unidas del Bañado Sur' }}</p>
             <h1 class="section-title">{{ $content['artisans_title'] ?? 'Nuestras Artesanas' }}</h1>

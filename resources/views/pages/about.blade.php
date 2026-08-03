@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Nosotros — Cateura Accesorios')
 @section('content')
-@php($c = \App\Models\SiteSetting::group('content'))
+@php($c = \App\Models\SiteSetting::group('content_about'))
 {{-- Hero --}}
 <section class="bg-stone-800 text-white py-20">
     <div class="container mx-auto px-4 max-w-4xl text-center">

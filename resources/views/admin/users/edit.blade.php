@@ -27,5 +27,15 @@
         </div>
     </form>
 </div>
+
+<div class="bg-white border border-stone-100 shadow-sm p-6">
+    <p class="text-xs font-medium text-stone-600 uppercase tracking-wider mb-2">Acceso</p>
+    <p class="text-sm text-stone-500 mb-4">Si {{ $user->name }} no puede ingresar, le podés enviar un enlace para que restablezca su contraseña.</p>
+    <form action="{{ route('admin.users.send-password-reset', $user) }}" method="POST"
+          onsubmit="return confirm('¿Enviar un enlace de restablecimiento de contraseña a {{ $user->email }}?')">
+        @csrf
+        <button type="submit" class="btn-stone py-2 px-4 text-xs">Enviar enlace de restablecimiento de contraseña</button>
+    </form>
+</div>
 </div>
 @endsection
