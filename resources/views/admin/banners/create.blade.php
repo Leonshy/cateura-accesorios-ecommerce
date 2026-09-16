@@ -27,7 +27,7 @@
                 <input type="text" name="cta_url" value="{{ old('cta_url', '/tienda') }}" class="input-cateura border p-2 w-full">
             </div>
         </div>
-        <x-admin.media-picker name="image" value="{{ old('image') }}" label="Imagen (1920×600 px recomendado)" />
+        <x-admin.media-picker name="image" value="{{ old('image') }}" label="Imagen" hint="1920×600 px recomendado" />
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-medium text-stone-600 mb-1">Orden de aparición</label>

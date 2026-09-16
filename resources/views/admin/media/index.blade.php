@@ -91,14 +91,18 @@ function mediaLibraryPage() {
                 alert('No se pudo copiar la URL.');
             }
         },
-        handleUpload(e) {
+        async handleUpload(e) {
             const files = Array.from(e.target.files);
             e.target.value = '';
             if (!files.length) return;
+
+            const edited = await window.editFilesBeforeUpload(files);
+            if (!edited.length) return;
+
             this.uploading = true;
             this.progress = 0;
             const formData = new FormData();
-            files.forEach(f => formData.append('files[]', f));
+            edited.forEach(f => formData.append('files[]', f));
             formData.append('_token', '{{ csrf_token() }}');
             const xhr = new XMLHttpRequest();
             xhr.upload.onprogress = (ev) => {

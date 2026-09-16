@@ -3,16 +3,22 @@
     'value'  => '',
     'label'  => 'Imagen',
     'accept' => 'image/*',
+    'hint'   => null,
+    'aspect' => null,
 ])
 
 @php
     $pickerId   = 'mp_' . Str::random(8);
     $acceptJson = json_encode($accept);
+    $aspectJson = json_encode($aspect);
     $resolvedValue = media_url($value);
 @endphp
 
 <div x-data="mediaPicker_{{ $pickerId }}()" x-init="init()">
     <label class="block text-xs font-medium text-stone-600 mb-1">{{ $label }}</label>
+    @if($hint)
+        <p class="text-[11px] text-stone-400 -mt-0.5 mb-1.5">{{ $hint }}</p>
+    @endif
 
     <div class="flex flex-wrap items-start gap-3">
         <div class="flex-shrink-0">
@@ -281,10 +287,13 @@ function mediaPicker_{{ $pickerId }}() {
         },
 
         async uploadPickerFiles(fileList) {
+            const edited = await window.editFilesBeforeUpload(fileList, { aspect: {!! $aspectJson !!} });
+            if (!edited.length) return;
+
             this.pickerUploading = true;
             this.pickerUploadProgress = 0;
             const formData = new FormData();
-            fileList.forEach(f => formData.append('files[]', f));
+            edited.forEach(f => formData.append('files[]', f));
             formData.append('_token', '{{ csrf_token() }}');
             try {
                 const xhr = new XMLHttpRequest();

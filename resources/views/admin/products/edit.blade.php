@@ -76,8 +76,8 @@
 
             <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
                 <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Imágenes</h3>
-                <x-admin.media-picker name="image" value="{{ old('image', $product->image) }}" label="Imagen principal" />
-                <x-admin.media-picker-multi name="gallery_images" :values="old('gallery_images', $product->images->pluck('path')->all())" label="Galería (múltiple)" />
+                <x-admin.media-picker name="image" value="{{ old('image', $product->image) }}" label="Imagen principal" hint="1200×1500 px recomendado" aspect="4/5" />
+                <x-admin.media-picker-multi name="gallery_images" :values="old('gallery_images', $product->images->pluck('path')->all())" label="Galería (múltiple)" hint="1200×1500 px recomendado, igual que la imagen principal" aspect="4/5" />
             </div>
 
             <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">

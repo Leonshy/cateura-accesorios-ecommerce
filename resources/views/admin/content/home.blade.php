@@ -50,7 +50,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
             @foreach([1,2,3,4] as $i)
-            <x-admin.media-picker name="historia_img{{ $i }}" value="{{ $settings['historia_img'.$i] ?? '' }}" label="Foto {{ $i }}" />
+            <x-admin.media-picker name="historia_img{{ $i }}" value="{{ $settings['historia_img'.$i] ?? '' }}" label="Foto {{ $i }}" hint="1000×1000 px recomendado" aspect="1/1" />
             @endforeach
         </div>
     </div>

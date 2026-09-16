@@ -30,7 +30,7 @@
                         <option value="evento" {{ old('type', $post->type) === 'evento' ? 'selected' : '' }}>Evento</option>
                     </select>
                 </div>
-                <x-admin.media-picker name="image" value="{{ old('image', $post->image) }}" label="Imagen" />
+                <x-admin.media-picker name="image" value="{{ old('image', $post->image) }}" label="Imagen" hint="1600×900 px recomendado" aspect="16/9" />
                 <div>
                     <label class="block text-xs font-medium text-stone-600 mb-1">Fecha de publicación</label>
                     <input type="date" name="published_at" value="{{ old('published_at', $post->published_at?->format('Y-m-d')) }}" class="input-cateura border p-2 w-full">

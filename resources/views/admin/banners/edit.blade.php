@@ -27,7 +27,7 @@
                 <input type="text" name="cta_url" value="{{ old('cta_url', $banner->cta_url) }}" class="input-cateura border p-2 w-full">
             </div>
         </div>
-        <x-admin.media-picker name="image" value="{{ old('image', $banner->image) }}" label="Imagen" />
+        <x-admin.media-picker name="image" value="{{ old('image', $banner->image) }}" label="Imagen" hint="1920×600 px recomendado" />
         <div>
             <label class="block text-xs font-medium text-stone-600 mb-1">Orden</label>
             <input type="number" name="order" value="{{ old('order', $banner->order) }}" min="0" class="input-cateura border p-2 w-full w-24">

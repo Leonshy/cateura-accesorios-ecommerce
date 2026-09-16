@@ -13,7 +13,7 @@
             <label class="block text-xs font-medium text-stone-600 mb-1">Descripción</label>
             <textarea name="description" rows="2" class="input-cateura border p-2 w-full">{{ old('description') }}</textarea>
         </div>
-        <x-admin.media-picker name="image" value="{{ old('image') }}" label="Imagen de portada" />
+        <x-admin.media-picker name="image" value="{{ old('image') }}" label="Imagen de portada" hint="1200×900 px recomendado" aspect="4/3" />
         <div>
             <label class="block text-xs font-medium text-stone-600 mb-1">Orden</label>
             <input type="number" name="order" value="{{ old('order', 0) }}" min="0" class="input-cateura border p-2 w-24">

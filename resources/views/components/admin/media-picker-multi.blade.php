@@ -3,15 +3,21 @@
     'values' => [],
     'label'  => 'Galería',
     'accept' => 'image/*',
+    'hint'   => null,
+    'aspect' => null,
 ])
 
 @php
     $pickerId    = 'mpm_' . Str::random(8);
     $initialJson = json_encode(array_map(fn ($v) => media_url($v), $values));
+    $aspectJson  = json_encode($aspect);
 @endphp
 
 <div x-data="mediaPickerMulti_{{ $pickerId }}()" x-init="init()">
-    <label class="block text-xs font-medium text-stone-600 mb-2">{{ $label }}</label>
+    <label class="block text-xs font-medium text-stone-600 mb-1">{{ $label }}</label>
+    @if($hint)
+        <p class="text-[11px] text-stone-400 -mt-0.5 mb-1.5">{{ $hint }}</p>
+    @endif
 
     <template x-for="url in images" :key="url">
         <input type="hidden" name="{{ $name }}[]" :value="url">
@@ -264,10 +270,13 @@ function mediaPickerMulti_{{ $pickerId }}() {
         },
 
         async uploadPickerFiles(fileList) {
+            const edited = await window.editFilesBeforeUpload(fileList, { aspect: {!! $aspectJson !!} });
+            if (!edited.length) return;
+
             this.pickerUploading = true;
             this.pickerUploadProgress = 0;
             const formData = new FormData();
-            fileList.forEach(f => formData.append('files[]', f));
+            edited.forEach(f => formData.append('files[]', f));
             formData.append('_token', '{{ csrf_token() }}');
             try {
                 const xhr = new XMLHttpRequest();

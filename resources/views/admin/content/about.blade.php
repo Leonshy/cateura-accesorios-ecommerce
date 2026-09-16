@@ -47,7 +47,7 @@
             <label class="block text-xs font-medium text-stone-600 mb-1">Párrafo 3</label>
             <textarea name="about_historia_text3" rows="3" class="input-cateura border p-2 w-full">{{ $settings['about_historia_text3'] ?? 'Cuando compras un producto Cateura Accesorios, contribuís directamente al sustento de familias paraguayas y a un modelo de economía circular que cuida el planeta.' }}</textarea>
         </div>
-        <x-admin.media-picker name="about_hero_image" value="{{ $settings['about_hero_image'] ?? '' }}" label="Foto institucional" />
+        <x-admin.media-picker name="about_hero_image" value="{{ $settings['about_hero_image'] ?? '' }}" label="Foto institucional" hint="1000×1000 px recomendado" aspect="1/1" />
     </div>
 
     <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">

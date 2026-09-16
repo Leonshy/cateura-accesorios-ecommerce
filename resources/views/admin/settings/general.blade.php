@@ -10,9 +10,9 @@
     <div class="bg-white border border-stone-100 shadow-sm p-6 space-y-4">
         <h3 class="font-medium text-stone-700 border-b border-stone-100 pb-3">Identidad del sitio</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <x-admin.media-picker name="site_logo" value="{{ $settings['site_logo'] ?? '' }}" label="Logo (encabezado)" />
-            <x-admin.media-picker name="site_logo_footer" value="{{ $settings['site_logo_footer'] ?? '' }}" label="Logo (pie de página)" />
-            <x-admin.media-picker name="site_favicon" value="{{ $settings['site_favicon'] ?? '' }}" label="Favicon" accept="image/png,image/x-icon,image/svg+xml" />
+            <x-admin.media-picker name="site_logo" value="{{ $settings['site_logo'] ?? '' }}" label="Logo (encabezado)" hint="Horizontal, fondo transparente (PNG), sin recorte fijo" />
+            <x-admin.media-picker name="site_logo_footer" value="{{ $settings['site_logo_footer'] ?? '' }}" label="Logo (pie de página)" hint="Horizontal, fondo transparente (PNG), sin recorte fijo" />
+            <x-admin.media-picker name="site_favicon" value="{{ $settings['site_favicon'] ?? '' }}" label="Favicon" accept="image/png,image/x-icon,image/svg+xml" hint="512×512 px recomendado (cuadrado)" aspect="1/1" />
         </div>
         <div>
             <label class="block text-xs font-medium text-stone-600 mb-1">Nombre del sitio</label>
