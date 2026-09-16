@@ -8,6 +8,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Admin\AboutValueAdminController;
 use App\Http\Controllers\Admin\ArtisanAdminController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Admin\NewsletterAdminController;
 use App\Http\Controllers\Admin\OrderAdminController;
 use App\Http\Controllers\Admin\PostAdminController;
 use App\Http\Controllers\Admin\ProductAdminController;
+use App\Http\Controllers\Admin\ProductReviewAdminController;
 use App\Http\Controllers\Admin\SettingsAdminController;
 use App\Http\Controllers\Admin\UserAdminController;
 use Illuminate\Support\Facades\Route;
@@ -74,6 +76,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::prefix('tienda')->group(function () {
     Route::get('/', [ShopController::class, 'index'])->name('shop.index');
     Route::get('/{slug}', [ProductController::class, 'show'])->name('shop.product');
+    Route::post('/{slug}/resenas', [ProductReviewController::class, 'store'])
+        ->middleware('throttle:5,1')->name('shop.product.reviews.store');
 });
 
 Route::prefix('artesanas')->group(function () {
@@ -182,6 +186,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
         // Artesanas
         Route::resource('artisans', ArtisanAdminController::class)->names('artisans');
+
+        // Reseñas de producto
+        Route::prefix('resenas')->name('reviews.')->group(function () {
+            Route::get('/', [ProductReviewAdminController::class, 'index'])->name('index');
+            Route::patch('/{review}/aprobar', [ProductReviewAdminController::class, 'approve'])->name('approve');
+            Route::delete('/{review}', [ProductReviewAdminController::class, 'destroy'])->name('destroy');
+        });
 
         // Noticias/eventos
         Route::resource('posts', PostAdminController::class)->names('posts');

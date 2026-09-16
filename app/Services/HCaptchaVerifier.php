@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
  */
 class HCaptchaVerifier
 {
-    public const FORMS = ['contact', 'newsletter', 'register'];
+    public const FORMS = ['contact', 'newsletter', 'register', 'review'];
 
     public static function isConfigured(): bool
     {

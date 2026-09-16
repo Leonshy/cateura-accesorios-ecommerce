@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductReview;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -18,6 +19,11 @@ class ProductController extends Controller
             ->where('id', '!=', $product->id)
             ->take(4)->get();
 
-        return view('shop.product', compact('product', 'related'));
+        // Un usuario autenticado solo puede dejar una reseña por producto —
+        // esto oculta el formulario si ya tiene una cargada (aprobada o no).
+        $userHasReviewed = auth()->check()
+            && ProductReview::where('product_id', $product->id)->where('user_id', auth()->id())->exists();
+
+        return view('shop.product', compact('product', 'related', 'userHasReviewed'));
     }
 }

@@ -177,7 +177,7 @@
     </div>
 
     {{-- Description + Reviews --}}
-    <div class="grid md:grid-cols-3 gap-10 mb-20" x-data="{ tab: 'description' }">
+    <div class="grid md:grid-cols-3 gap-10 mb-20" x-data="{ tab: '{{ (request('tab') === 'reviews' || old('rating') !== null || $errors->any() || session('error')) ? 'reviews' : 'description' }}' }">
         <div class="md:col-span-3">
             <div class="flex border-b border-stone-200 mb-8">
                 <button @click="tab = 'description'" :class="tab === 'description' ? 'border-copper-500 text-copper-500' : 'border-transparent text-stone-500'" class="border-b-2 px-6 py-3 text-sm font-medium uppercase tracking-wider transition-colors">Descripción</button>
@@ -207,6 +207,55 @@
                     @endforeach
                 </div>
                 @endif
+
+                <div class="mt-10 pt-8 border-t border-stone-100 max-w-lg">
+                    <h3 class="font-medium text-stone-700 mb-4">Dejar una reseña</h3>
+
+                    @if(session('success'))
+                    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm mb-4">{{ session('success') }}</div>
+                    @endif
+                    @if(session('error'))
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm mb-4">{{ session('error') }}</div>
+                    @endif
+
+                    @if($userHasReviewed)
+                    <p class="text-sm text-stone-500">Ya dejaste una reseña para este producto. ¡Gracias por tu opinión!</p>
+                    @else
+                    <form method="POST" action="{{ route('shop.product.reviews.store', $product->slug) }}" class="space-y-4" x-data="{ rating: {{ (int) old('rating', 0) }} }">
+                        @csrf
+                        <div>
+                            <label class="block text-xs font-medium text-stone-600 mb-1">Tu calificación *</label>
+                            <div class="flex gap-1">
+                                @for($i = 1; $i <= 5; $i++)
+                                <button type="button" @click="rating = {{ $i }}" class="focus:outline-none">
+                                    <svg class="w-7 h-7 transition-colors" :class="rating >= {{ $i }} ? 'text-copper-500' : 'text-stone-300'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </button>
+                                @endfor
+                            </div>
+                            <input type="hidden" name="rating" :value="rating">
+                            @error('rating')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        @guest
+                        <div>
+                            <label class="block text-xs font-medium text-stone-600 mb-1">Tu nombre *</label>
+                            <input type="text" name="reviewer_name" value="{{ old('reviewer_name') }}" class="input-cateura border p-2 w-full">
+                            @error('reviewer_name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        @endguest
+
+                        <div>
+                            <label class="block text-xs font-medium text-stone-600 mb-1">Comentario (opcional)</label>
+                            <textarea name="comment" rows="3" class="input-cateura border p-2 w-full">{{ old('comment') }}</textarea>
+                            @error('comment')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <x-hcaptcha form="review" />
+
+                        <button type="submit" class="btn-copper">Enviar reseña</button>
+                    </form>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

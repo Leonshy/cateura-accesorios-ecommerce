@@ -108,6 +108,10 @@
                 <input type="checkbox" name="hcaptcha_enabled_register" value="1" {{ ($settings['hcaptcha_enabled_register'] ?? false) ? 'checked' : '' }} class="text-copper-500">
                 <span class="text-sm text-stone-600">Registro de cuenta de cliente</span>
             </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="hcaptcha_enabled_review" value="1" {{ ($settings['hcaptcha_enabled_review'] ?? false) ? 'checked' : '' }} class="text-copper-500">
+                <span class="text-sm text-stone-600">Reseñas de producto</span>
+            </label>
         </div>
     </div>
 
