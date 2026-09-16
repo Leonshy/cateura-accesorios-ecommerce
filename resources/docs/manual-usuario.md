@@ -23,7 +23,7 @@ Para comprar no hace falta tener una cuenta, pero para gestionar el panel admini
 2. **Ingresar email y contraseña** — usá el correo con el que te registraste (clientes) o el correo asignado por la Asociación (equipo administrativo).
 3. **Sos redirigido según tu rol** — un cliente entra a "Mi cuenta". Un usuario con rol administrativo (Admin, Editor o Vendedor) entra directamente al panel en `/admin`.
 
-> ¿Olvidaste tu contraseña? Desde la pantalla de inicio de sesión podés pedir un enlace de recuperación a tu correo. Si un cliente no puede recibir ese correo, cualquier Admin puede enviarle el enlace directamente desde **Usuarios** (ver sección 17).
+> ¿Olvidaste tu contraseña? Desde la pantalla de inicio de sesión podés pedir un enlace de recuperación a tu correo. Si un cliente no puede recibir ese correo, cualquier Admin puede enviarle el enlace directamente desde **Usuarios** (ver sección 18).
 
 Al registrarse, cada cliente debe confirmar su correo antes de poder finalizar una compra con cuenta iniciada (el checkout como invitado, sin cuenta, no lo exige).
 
@@ -48,13 +48,15 @@ A un usuario se le pueden asignar varios roles a la vez desde **Usuarios** en el
 
 **Ficha de producto** — al entrar a un producto (`/tienda/nombre-del-producto`) se ve la descripción completa, el precio (y el precio anterior tachado si tiene descuento), el stock disponible, los colores para elegir y las imágenes de la galería.
 
+> **Reseñas:** en la pestaña "Reseñas" de la ficha, cualquier visitante (con cuenta o como invitado) puede calificar el producto de 1 a 5 estrellas y dejar un comentario. La reseña no se publica de inmediato — queda pendiente hasta que el equipo administrativo la aprueba (ver sección 15). Un cliente con cuenta iniciada solo puede dejar una reseña por producto.
+
 **Otras secciones públicas:**
 - **Artesanas** (`/artesanas`): perfiles con la biografía de cada artesana.
 - **Noticias** (`/noticias`): novedades y eventos de la Asociación.
 - **Nosotros** (`/nosotros`): historia y valores de la Asociación.
 - **Contacto** (`/contacto`): formulario de consultas y suscripción al boletín.
 
-> **Suscripción al boletín con confirmación:** al suscribirse, la persona recibe un correo con un enlace de confirmación. Hasta que lo confirme, aparece como "sin confirmar" en el panel (ver sección 16). Si no confirma dentro de **72 horas**, su correo se elimina automáticamente de la lista.
+> **Suscripción al boletín con confirmación:** al suscribirse, la persona recibe un correo con un enlace de confirmación. Hasta que lo confirme, aparece como "sin confirmar" en el panel (ver sección 17). Si no confirma dentro de **72 horas**, su correo se elimina automáticamente de la lista.
 
 ## 5. Carrito de compras
 
@@ -106,6 +108,8 @@ Al iniciar sesión con un usuario administrativo, se entra directamente a `/admi
 La biblioteca de multimedia (`/admin/multimedia`) centraliza todas las imágenes del sitio: fotos de producto, banners, fotos de artesanas, etc.
 
 - **Subir:** se puede arrastrar o seleccionar un archivo; el sistema limpia automáticamente los metadatos (EXIF) por privacidad.
+- **Editar antes de subir:** al elegir una foto (JPG, PNG o WebP), se abre un editor donde se puede **recortar, rotar, espejar y hacer zoom** antes de guardarla — no hace falta editarla en otro programa primero. El editor sugiere automáticamente la proporción recomendada según dónde se va a usar la imagen (por ejemplo, cuadrada para fotos de artesana, panorámica para banners) y muestra en vivo el tamaño en píxeles del recorte a medida que se ajusta. También se puede subir la foto tal cual, sin editar, o elegir "Subir sin editar" para archivos que no se pueden recortar (PDF, SVG, GIF).
+- **Tamaño recomendado por campo:** cada campo de imagen del panel (producto, categoría, banner, artesana, noticia, logo, favicon, etc.) muestra debajo del título el tamaño en píxeles recomendado para que se vea nítida sin ser demasiado pesada.
 - **Buscar y reutilizar:** el selector ("picker") permite elegir una imagen ya subida en vez de repetir archivos, desde cualquier formulario que necesite una imagen (producto, banner, artesana, etc.).
 - **Texto alternativo:** cada imagen puede tener una descripción (alt) para accesibilidad y buscadores.
 - **Eliminar:** borra el archivo de la biblioteca.
@@ -155,13 +159,29 @@ Desde `/admin/posts` se redactan noticias y eventos. Cada publicación tiene un 
 | Borrador | Guardado pero no visible todavía en la tienda pública. |
 | Publicado | Visible en `/noticias` para cualquier visitante. |
 
+> Al crear una publicación nueva, el estado arranca marcado en **Publicado** por defecto — si querés guardarla sin que se vea todavía, cambialo manualmente a Borrador antes de guardar.
+
 ## 14. Banners
 
 *Para: Admin, Editor*
 
 Desde `/admin/banners` se administran las imágenes destacadas de la portada (hero). Cada banner tiene una imagen, un subtítulo corto, una descripción y un botón de llamada a la acción (texto y enlace) configurable.
 
-## 15. Pedidos
+## 15. Reseñas de producto
+
+*Para: Admin, Editor*
+
+Desde `/admin/resenas` se moderan las reseñas que dejan los clientes en la ficha de cada producto (ver sección 4). El enlace en el menú lateral muestra un número con la cantidad de reseñas pendientes, si hay alguna.
+
+- **Pendientes:** reseñas nuevas, todavía no visibles en la tienda. Se pueden **Aprobar** (pasan a mostrarse públicamente en la ficha del producto) o **Eliminar** (se borran sin publicarse, por ejemplo si es spam o contenido inapropiado).
+- **Aprobadas:** reseñas ya visibles en la tienda. También se pueden eliminar en cualquier momento si hace falta.
+- **Todas:** el listado completo, sin filtrar por estado.
+
+Cada fila muestra el producto, quién la escribió, la calificación en estrellas, el comentario y la fecha. Una reseña aprobada y luego eliminada deja de mostrarse de inmediato en la ficha del producto.
+
+> El formulario de reseñas puede protegerse con hCaptcha igual que los demás formularios públicos — ver "Configuración general" (sección 20).
+
+## 16. Pedidos
 
 *Para: Admin, Vendedor*
 
@@ -193,7 +213,7 @@ Desde `/admin/orders` se ve la lista completa de pedidos, con filtros por estado
 2. **Revisar el comprobante (si es transferencia)** — verificar que el monto y los datos coincidan con el pedido.
 3. **Actualizar estado** — cambiar el estado del pedido y del pago según corresponda, y agregar notas internas si hace falta (por ejemplo, coordinar el envío).
 
-## 16. Mensajes de contacto y newsletter
+## 17. Mensajes de contacto y newsletter
 
 *Para: Admin, Vendedor*
 
@@ -201,7 +221,7 @@ Desde `/admin/contactos` se leen y responden (fuera de la plataforma, por correo
 
 Desde `/admin/newsletter` se ve la lista de personas suscriptas al boletín y se puede exportar en un archivo CSV (correo y fecha de suscripción) para usar en campañas de email marketing. Cada suscriptor muestra si ya **confirmó** su correo o si todavía está **pendiente de confirmación** (y se elimina solo si no confirma dentro de 72 horas — ver sección 4).
 
-## 17. Usuarios
+## 18. Usuarios
 
 *Para: Admin*
 
@@ -211,7 +231,7 @@ Desde `/admin/usuarios` se ve la lista de todas las cuentas registradas, con la 
 
 > **Precaución:** asignar el rol Admin da control total sobre pagos, envíos y el resto de los usuarios. Reservarlo solo para las personas de máxima confianza en la Asociación.
 
-## 18. Textos del sitio
+## 19. Textos del sitio
 
 *Para: Admin*
 
@@ -223,7 +243,7 @@ Desde **Textos** (`/admin/contenido`) se edita el contenido escrito e imágenes 
 
 **Páginas legales** — política de privacidad, términos y condiciones, políticas de compra, de envío y de cambios/devoluciones — se editan por separado desde `/admin/legal`. Todas se pueden ocultar del sitio si no aplican (por ejemplo, si no hay política de envío propia todavía), **excepto** privacidad y términos y condiciones, que siempre quedan visibles porque son de aceptación obligatoria en el checkout.
 
-## 19. Configuración general
+## 20. Configuración general
 
 *Para: Admin*
 
@@ -234,9 +254,9 @@ Desde `/admin/configuracion` se ajustan los datos globales del sitio:
 - Correo, teléfono y dirección de contacto.
 - Enlaces a Instagram, Facebook, YouTube y TikTok, y número/mensaje predefinido de WhatsApp. Un ícono de red social solo se muestra en el sitio si su enlace está completo — si queda vacío o a medio cargar, se oculta solo.
 - Google Analytics y Meta Pixel, para medir visitas y campañas.
-- **hCaptcha** — con las claves cargadas, se puede elegir en qué formularios públicos exigirlo por separado: contacto, newsletter y registro de cuenta. Un formulario sin marcar no lo pide.
+- **hCaptcha** — con las claves cargadas, se puede elegir en qué formularios públicos exigirlo por separado: contacto, newsletter, registro de cuenta y reseñas de producto. Un formulario sin marcar no lo pide.
 
-## 20. SEO y visibilidad para buscadores e inteligencia artificial
+## 21. SEO y visibilidad para buscadores e inteligencia artificial
 
 *Para: Admin (informativo — no requiere configuración manual)*
 
@@ -249,7 +269,7 @@ El sitio genera automáticamente, sin que el equipo tenga que hacer nada:
 
 Todo esto se actualiza solo a medida que se cargan o cambian productos, categorías y noticias — no hay ninguna pantalla del panel para editarlo.
 
-## 21. Métodos de pago y envíos
+## 22. Métodos de pago y envíos
 
 *Para: Admin*
 
@@ -270,7 +290,7 @@ Todo esto se actualiza solo a medida que se cargan o cambian productos, categor�
 - **Envío propio por zonas:** definir zonas (departamento/ciudad) con su costo correspondiente, que se calcula automáticamente en el checkout.
 - **AEX:** integración con la empresa de encomiendas AEX, con usuario, contraseña y entorno (pruebas o producción).
 
-## 22. Preguntas frecuentes
+## 23. Preguntas frecuentes
 
 **Un cliente pagó por transferencia, ¿qué hago?**
 Entrá al pedido en Pedidos, revisá el comprobante adjunto y, si corresponde, cambiá el estado de pago a "Pagado" y el estado del pedido a "Confirmado".
@@ -290,7 +310,10 @@ No necesariamente. El carrito solo se vacía cuando la pasarela confirma el pago
 **¿Qué pasa si alguien entra a una página que no existe?**
 Ve una página de error con la marca del sitio (no la pantalla genérica de Laravel), con un botón para volver al inicio o a la tienda.
 
-## 23. Accesos de prueba (entorno local)
+**Un cliente dejó una reseña y no aparece en la tienda, ¿está mal?**
+No, es el comportamiento esperado. Toda reseña nueva queda pendiente de aprobación — hay que ir a Reseñas de producto (sección 15) y aprobarla para que se vea públicamente.
+
+## 24. Accesos de prueba (entorno local)
 
 Estas cuentas existen únicamente en el entorno de desarrollo local (sembradas por el seeder), para probar cada rol antes de publicar cambios. No existen en el sitio en producción salvo que se ejecute el mismo proceso de siembra ahí.
 
