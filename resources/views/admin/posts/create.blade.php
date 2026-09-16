@@ -38,8 +38,8 @@
                 <div>
                     <label class="block text-xs font-medium text-stone-600 mb-1">Estado</label>
                     <select name="status" class="input-cateura border p-2 w-full">
-                        <option value="borrador" {{ old('status') !== 'publicado' ? 'selected' : '' }}>Borrador</option>
-                        <option value="publicado" {{ old('status') === 'publicado' ? 'selected' : '' }}>Publicado</option>
+                        <option value="borrador" {{ old('status') === 'borrador' ? 'selected' : '' }}>Borrador</option>
+                        <option value="publicado" {{ old('status', 'publicado') === 'publicado' ? 'selected' : '' }}>Publicado</option>
                     </select>
                 </div>
             </div>
