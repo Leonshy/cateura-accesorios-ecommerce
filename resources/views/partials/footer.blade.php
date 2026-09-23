@@ -107,11 +107,16 @@
         </div>
     </div>
     <div class="border-t border-stone-800 py-5">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-stone-500">
-            <p>© {{ date('Y') }} Cateura Accesorios · Asociación Mujeres Unidas del Bañado Sur · Todos los derechos reservados.</p>
-            <div class="flex gap-4">
-                <a href="{{ route('legal.terminos') }}" class="hover:text-copper-400 transition-colors">Términos</a>
-                <a href="{{ route('legal.privacidad') }}" class="hover:text-copper-400 transition-colors">Privacidad</a>
+        <div class="max-w-7xl mx-auto px-4 flex flex-col gap-3 text-xs text-stone-500">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-2">
+                <p>© {{ date('Y') }} Cateura Accesorios · Asociación Mujeres Unidas del Bañado Sur · Todos los derechos reservados.</p>
+                <div class="flex gap-4">
+                    <a href="{{ route('legal.terminos') }}" class="hover:text-copper-400 transition-colors">Términos</a>
+                    <a href="{{ route('legal.privacidad') }}" class="hover:text-copper-400 transition-colors">Privacidad</a>
+                </div>
+            </div>
+            <div class="text-center md:text-right">
+                <a href="https://webparaguay.com" target="_blank" rel="noopener" class="hover:text-copper-400 transition-colors">Desarrollado por WebParaguay</a>
             </div>
         </div>
     </div>
