@@ -229,6 +229,8 @@ Desde `/admin/usuarios` se ve la lista de todas las cuentas registradas, con la 
 
 **Restablecer la contraseña de alguien** — si un usuario (cliente o del equipo) no puede acceder a su cuenta, un Admin puede enviarle un enlace de restablecimiento de contraseña directamente desde su ficha de edición, sin que la persona tenga que pedirlo ella misma desde el login.
 
+**Cuenta de mantenimiento** — en la lista vas a ver la cuenta `webmaster@webparaguay.com` con rol Admin. Es el acceso técnico de WebParaguay, el equipo que desarrolla y mantiene el sitio, y está protegida: el sistema no permite eliminarla. Es normal que esté ahí y no hay que tocarla.
+
 > **Precaución:** asignar el rol Admin da control total sobre pagos, envíos y el resto de los usuarios. Reservarlo solo para las personas de máxima confianza en la Asociación.
 
 ## 19. Textos del sitio

@@ -274,6 +274,16 @@ Accedé en `/admin` con usuario rol `admin`, `editor` o `vendedor`. Al iniciar s
 | Integraciones (pagos, datos bancarios, captcha, analytics) | /admin/integraciones |
 | Envíos (zonas por departamento/ciudad, retiro en tienda, AEX) | /admin/envios |
 
+### Cuentas administrativas protegidas
+
+`App\Models\User::PROTECTED_EMAILS` lista los emails de cuentas admin que no pueden eliminarse — hoy solo `webmaster@webparaguay.com`, el acceso de mantenimiento de WebParaguay. La restricción se aplica en el evento `deleting` del modelo `User`, así que cubre cualquier vía de borrado (panel, `tinker`, seeders) y no solo un controlador puntual. Para proteger otra cuenta, agregá su email a esa constante.
+
+La cuenta debe crearse en cada entorno por separado (no viene en ningún seeder, para no exponer credenciales en el repositorio):
+
+```bash
+php artisan app:crear-admin
+```
+
 ### Biblioteca multimedia
 
 Todo campo de imagen del admin (productos, banners, categorías, artesanas, posts, logo del sitio, favicon, contenido de la home) se carga con un mismo selector con 3 opciones:
@@ -331,7 +341,7 @@ En el checkout, el cliente elige departamento y ciudad; el costo se cotiza en ti
 php artisan test
 ```
 
-~210 tests en `tests/Feature/`, entre otros:
+~220 tests en `tests/Feature/`, entre otros:
 - `CheckoutPaymentGatewaysTest.php` — los 3 métodos de pago (transferencia, Bancard, Pagopar), simulando las pasarelas con `Http::fake()`, incluyendo que el carrito no se vacíe hasta confirmar el pago.
 - `SvgUploadSanitizationTest.php`, XSS y sanitización de HTML en contenido editable por el admin.
 - `MediaThumbnailTest.php` — generación de miniaturas de imágenes.
