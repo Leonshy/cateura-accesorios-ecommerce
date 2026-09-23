@@ -13,6 +13,16 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /**
+     * Emails de cuentas administrativas protegidas contra eliminación
+     * (accesos de mantenimiento del proveedor/agencia). Bloqueado a nivel
+     * de modelo en `booted()` para cubrir cualquier vía de borrado
+     * (panel admin, tinker, seeders), no solo un controlador puntual.
+     */
+    public const PROTECTED_EMAILS = [
+        'webmaster@webparaguay.com',
+    ];
+
     protected $fillable = ['name', 'email', 'password'];
 
     protected $hidden = ['password', 'remember_token'];
@@ -23,6 +33,20 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user) {
+            if ($user->isProtected()) {
+                throw new \RuntimeException("El usuario {$user->email} está protegido y no puede eliminarse.");
+            }
+        });
+    }
+
+    public function isProtected(): bool
+    {
+        return in_array($this->email, self::PROTECTED_EMAILS, true);
     }
 
     public function roles()
